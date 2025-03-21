@@ -24,3 +24,7 @@ extend {{ item.extend }}
 {% if "pve" in ansible_kernel %}
 extend proxmox /usr/bin/sudo {{ snmp_extension_scripts }}/proxmox
 {% endif %}
+{% if "systemd" in ansible_facts.service_mgr %}
+extend systemd {{ snmp_extension_scripts }}/systemd.py
+{% endif %}
+ansible_facts.service_mgr == "systemd"
