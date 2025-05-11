@@ -46,7 +46,7 @@
 - name: 'linux : install snmp extension proxmox'
   become: true
   get_url:
-    url: 'https://raw.githubusercontent.com/librenms/librenms-agent/master/agent-local/proxmox'
+    url: 'https://raw.githubusercontent.com/sshockley/librenms-agent/master/agent-local/proxmox'
     dest: '{{ snmp_extension_scripts + "/" }}'
     owner: root
     group: root
@@ -80,7 +80,7 @@
   block:
     - name: 'Download librenms-osupdates-generate-service'
       get_url:
-        url: 'https://raw.githubusercontent.com/librenms/librenms-agent/refs/heads/master/snmp/unpriv/osupdates/librenms-osupdates-generate.service'
+        url: 'https://raw.githubusercontent.com/sshockley/librenms-agent/refs/heads/master/snmp/unpriv/osupdates/librenms-osupdates-generate.service'
         dest: '{{ "/etc/systemd/system/" }}'
         owner: root
         group: root
@@ -91,7 +91,7 @@
         selevel: s0
     - name: 'Download librenms-osupdates-generate-service'
       get_url:
-        url: 'https://raw.githubusercontent.com/librenms/librenms-agent/refs/heads/master/snmp/unpriv/osupdates/librenms-osupdates-generate.service'
+        url: 'https://raw.githubusercontent.com/sshockley/librenms-agent/refs/heads/master/snmp/unpriv/osupdates/librenms-osupdates-generate.service'
         dest: '{{ "/etc/systemd/system/" }}'
         owner: root
         group: root
@@ -102,7 +102,7 @@
         selevel: s0
     - name: 'Download librenms-osupdates-generate.timer'
       get_url:
-        url: 'https://raw.githubusercontent.com/librenms/librenms-agent/refs/heads/master/snmp/unpriv/osupdates/librenms-osupdates-generate.timer'
+        url: 'https://raw.githubusercontent.com/sshockley/librenms-agent/refs/heads/master/snmp/unpriv/osupdates/librenms-osupdates-generate.timer'
         dest: '{{ snmp_extension_scripts + "/" }}'
         owner: root
         group: root
@@ -113,7 +113,7 @@
         selevel: s0
     - name: 'Download osupdates-unpriv-gather.sh'
       get_url:
-        url: 'https://raw.githubusercontent.com/librenms/librenms-agent/refs/heads/master/snmp/unpriv/osupdates/osupdates-unpriv-gather.sh'
+        url: 'https://raw.githubusercontent.com/sshockley/librenms-agent/refs/heads/master/snmp/unpriv/osupdates/osupdates-unpriv-gather.sh'
         dest: '{{ snmp_extension_scripts + "/" }}'
         owner: root
         group: root
@@ -124,7 +124,7 @@
         selevel: s0
     - name: 'Download osupdates-unpriv-generate.sh'
       get_url:
-        url: 'https://raw.githubusercontent.com/librenms/librenms-agent/refs/heads/master/snmp/unpriv/osupdates/osupdates-unpriv-generate.sh'
+        url: 'https://raw.githubusercontent.com/sshockley/librenms-agent/refs/heads/master/snmp/unpriv/osupdates/osupdates-unpriv-generate.sh'
         dest: '{{ snmp_extension_scripts + "/" }}'
         owner: root
         group: root

@@ -21,7 +21,7 @@ snmp_agentaddress_port:
   ipv6: 161
 
 snmp_extension_list:
-  - url: 'https://raw.githubusercontent.com/librenms/librenms-agent/master/snmp/distro'
+  - url: 'https://raw.githubusercontent.com/sshockley/librenms-agent/master/snmp/distro'
     extend: '.1.3.6.1.4.1.2021.7890.1 distro {{ snmp_extension_scripts }}/distro'
-  #- url: 'https://raw.githubusercontent.com/librenms/librenms-agent/master/snmp/osupdate'
+  #- url: 'https://raw.githubusercontent.com/sshockley/librenms-agent/master/snmp/osupdate'
   #  extend: 'osupdate {{ snmp_extension_scripts }}/osupdate'
