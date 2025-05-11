@@ -64,7 +64,7 @@
   block:
     - name: 'Download librenms-systemd snmp extension'
       get_url:
-        url: 'https://github.com/librenms/librenms-agent/raw/refs/heads/master/snmp/unpriv/systemd/systemd.py'
+        url: 'https://github.com/sshockley/librenms-agent/raw/refs/heads/master/snmp/unpriv/systemd/systemd.py'
         dest: '{{ snmp_extension_scripts + "/" }}'
         owner: root
         group: root
@@ -75,7 +75,7 @@
         selevel: s0
     - name: 'Download librenms-systemd crontab'
       get_url:
-        url: 'https://github.com/librenms/librenms-agent/raw/refs/heads/master/snmp/unpriv/systemd/99systemd-generate'
+        url: 'https://github.com/sshockley/librenms-agent/raw/refs/heads/master/snmp/unpriv/systemd/99systemd-generate'
         dest: '/etc/cron.d'
         owner: root
         group: root
@@ -93,7 +93,7 @@
   block:
     - name: 'Download librenms-systemd crontab'
       get_url:
-        url: 'https://github.com/librenms/librenms-agent/raw/refs/heads/master/snmp/unpriv/osupdates/99osupdates-generate'
+        url: 'https://github.com/sshockley/librenms-agent/raw/refs/heads/master/snmp/unpriv/osupdates/99osupdates-generate'
         dest: '/etc/cron.d'
         owner: root
         group: root
