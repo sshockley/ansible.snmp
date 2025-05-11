@@ -59,7 +59,7 @@
   tags:
     - configuration
 
-- name: 'linux : install snmp extension systemd'
+- name: 'linux : install systemd snmp extension'
   become: true
   get_url:
     url: 'https://github.com/librenms/librenms-agent/raw/refs/heads/master/snmp/systemd.py'
@@ -74,6 +74,71 @@
   when: ansible_facts.service_mgr == "systemd"
   tags:
     - configuration
+
+- name: 'linux : install osupdates unprivileged snmp extension '
+  become: true
+  block:
+    - name: 'Download librenms-osupdates-generate-service'
+      get_url:
+        url: 'https://raw.githubusercontent.com/librenms/librenms-agent/refs/heads/master/snmp/unpriv/osupdates/librenms-osupdates-generate.service'
+        dest: '{{ "/etc/systemd/system/" }}'
+        owner: root
+        group: root
+        mode: 0755
+        seuser: system_u
+        serole: object_r
+        setype: lib_t
+        selevel: s0
+    - name: 'Download librenms-osupdates-generate-service'
+      get_url:
+        url: 'https://raw.githubusercontent.com/librenms/librenms-agent/refs/heads/master/snmp/unpriv/osupdates/librenms-osupdates-generate.service'
+        dest: '{{ "/etc/systemd/system/" }}'
+        owner: root
+        group: root
+        mode: 0755
+        seuser: system_u
+        serole: object_r
+        setype: lib_t
+        selevel: s0
+    - name: 'Download librenms-osupdates-generate.timer'
+      get_url:
+        url: 'https://raw.githubusercontent.com/librenms/librenms-agent/refs/heads/master/snmp/unpriv/osupdates/librenms-osupdates-generate.timer'
+        dest: '{{ snmp_extension_scripts + "/" }}'
+        owner: root
+        group: root
+        mode: 0755
+        seuser: system_u
+        serole: object_r
+        setype: lib_t
+        selevel: s0
+    - name: 'Download osupdates-unpriv-gather.sh'
+      get_url:
+        url: 'https://raw.githubusercontent.com/librenms/librenms-agent/refs/heads/master/snmp/unpriv/osupdates/osupdates-unpriv-gather.sh'
+        dest: '{{ snmp_extension_scripts + "/" }}'
+        owner: root
+        group: root
+        mode: 0755
+        seuser: system_u
+        serole: object_r
+        setype: lib_t
+        selevel: s0
+    - name: 'Download osupdates-unpriv-generate.sh'
+      get_url:
+        url: 'https://raw.githubusercontent.com/librenms/librenms-agent/refs/heads/master/snmp/unpriv/osupdates/osupdates-unpriv-generate.sh'
+        dest: '{{ snmp_extension_scripts + "/" }}'
+        owner: root
+        group: root
+        mode: 0755
+        seuser: system_u
+        serole: object_r
+        setype: lib_t
+        selevel: s0
+    - name: 'Activate timer'
+      ansible.builtin.command: systemctl enable --now librenms-osupdates-generate.timer
+  when: ansible_facts.service_mgr == "systemd"
+  tags:
+    - configuration
+
 
 - name: 'linux : configure snmpd daemon'
   become: true
@@ -108,7 +173,6 @@
     - configuration
 
 - block:
-
     - name: 'linux : stopped snmp'
       become: true
       service:
