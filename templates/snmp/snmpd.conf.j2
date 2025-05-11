@@ -25,5 +25,5 @@ extend {{ item.extend }}
 extend proxmox /usr/bin/sudo {{ snmp_extension_scripts }}/proxmox
 {% endif %}
 {% if "systemd" in ansible_facts.service_mgr %}
-extend systemd {{ snmp_extension_scripts }}/systemd.py
+extend systemd systemd /usr/bin/cat /var/lib/net-snmp/systemd
 {% endif %}

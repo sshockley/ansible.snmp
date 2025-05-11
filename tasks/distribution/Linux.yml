@@ -61,16 +61,30 @@
 
 - name: 'linux : install systemd snmp extension'
   become: true
-  get_url:
-    url: 'https://github.com/librenms/librenms-agent/raw/refs/heads/master/snmp/systemd.py'
-    dest: '{{ snmp_extension_scripts + "/" }}'
-    owner: root
-    group: root
-    mode: 0755
-    seuser: system_u
-    serole: object_r
-    setype: lib_t
-    selevel: s0
+  block:
+    - name: 'Download librenms-systemd snmp extension'
+      get_url:
+        url: 'https://github.com/librenms/librenms-agent/raw/refs/heads/master/snmp/unpriv/systemd/systemd.py'
+        dest: '{{ snmp_extension_scripts + "/" }}'
+        owner: root
+        group: root
+        mode: 0755
+        seuser: system_u
+        serole: object_r
+        setype: lib_t
+        selevel: s0
+    - name: 'Download librenms-systemd crontab'
+      get_url:
+        url: 'https://github.com/librenms/librenms-agent/raw/refs/heads/master/snmp/unpriv/systemd/99systemd-generate'
+        dest: '/etc/cron.d'
+        owner: root
+        group: root
+        mode: 0755
+        seuser: system_u
+        serole: object_r
+        setype: system_cron_spool_t
+        selevel: s0
+
   when: ansible_facts.service_mgr == "systemd"
   tags:
     - configuration
