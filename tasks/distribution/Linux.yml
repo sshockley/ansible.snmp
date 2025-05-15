@@ -113,6 +113,18 @@
         serole: object_r
         setype: system_cron_spool_t
         selevel: s0
+    - name: 'linux : create osupdates directory'
+      become: true
+      file:
+        path: '{{ snmp_persistent_directory }}/osupdates'
+        state: directory
+        owner: root
+        group: root
+        mode: 0755
+        seuser: system_u
+        serole: object_r
+        setype: snmpd_var_lib_t
+        selevel: s0
   #when: ansible_facts.service_mgr == "systemd"
   tags:
     - configuration
