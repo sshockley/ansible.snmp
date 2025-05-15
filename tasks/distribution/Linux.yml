@@ -79,7 +79,7 @@
         dest: '/etc/cron.d'
         owner: root
         group: root
-        mode: 0755
+        mode: 0644
         seuser: system_u
         serole: object_r
         setype: system_cron_spool_t
@@ -120,7 +120,7 @@
 - name: 'linux : install osupdates crontab'
   become: true
   template:
-    src: 'crond/99osupdates-generate.j2'
+    src: 'cron.d/99osupdates-generate.j2'
     dest: '/etc/cron.d'
     owner: root
     group: root
