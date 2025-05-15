@@ -104,7 +104,7 @@
         selevel: s0
     - name: 'Download osupdates-unpriv-gather.sh'
       get_url:
-        url: 'https://raw.githubusercontent.com/sshockley/librenms-agent/refs/heads/master/snmp/osupdate'
+        url: 'https://raw.githubusercontent.com/sshockley/librenms-agent/refs/heads/master/snmp/osupdates'
         dest: '{{ snmp_extension_scripts + "/" }}'
         owner: root
         group: root
