@@ -73,10 +73,10 @@
         serole: object_r
         setype: lib_t
         selevel: s0
-    - name: 'Download librenms-systemd crontab'
-      get_url:
-        url: 'https://github.com/sshockley/librenms-agent/raw/refs/heads/master/snmp/unpriv/systemd/99systemd-generate'
-        dest: '/etc/cron.d'
+    - name: 'linux : install librenms-systemd crontab'
+      template:
+        src: 'cron.d/99systemd-generate.j2'
+        dest: '/etc/cron.d/99systemd-generate'
         owner: root
         group: root
         mode: 0644
