@@ -91,17 +91,6 @@
 - name: 'linux : install osupdates unprivileged snmp extension '
   become: true
   block:
-    # - name: 'Download librenms-systemd crontab'
-    #   get_url:
-    #     url: 'https://github.com/sshockley/librenms-agent/raw/refs/heads/master/snmp/unpriv/osupdates/99osupdates-generate'
-    #     dest: '/etc/cron.d'
-    #     owner: root
-    #     group: root
-    #     mode: 0755
-    #     seuser: system_u
-    #     serole: object_r
-    #     setype: system_cron_spool_t
-    #     selevel: s0
     - name: 'Download osupdates-unpriv-gather.sh'
       get_url:
         url: 'https://github.com/sshockley/librenms-agent/raw/refs/heads/master/snmp/unpriv/osupdates/osupdates-unpriv-gather.sh'
@@ -127,9 +116,6 @@
   #when: ansible_facts.service_mgr == "systemd"
   tags:
     - configuration
-  
-
-
 
 - name: 'linux : configure snmpd daemon'
   become: true
