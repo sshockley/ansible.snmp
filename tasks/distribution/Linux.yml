@@ -113,25 +113,22 @@
         serole: object_r
         setype: lib_t
         selevel: s0
+    - name: 'linux : install osupdates crontab'
+      template:
+        src: 'cron.d/99osupdates-generate.j2'
+        dest: '/etc/cron.d'
+        owner: root
+        group: root
+        mode: 0644
+        seuser: system_u
+        serole: object_r
+        setype: system_cron_spool_t
+        selevel: s0
   #when: ansible_facts.service_mgr == "systemd"
   tags:
     - configuration
   
-- name: 'linux : install osupdates crontab'
-  become: true
-  template:
-    src: 'cron.d/99osupdates-generate.j2'
-    dest: '/etc/cron.d'
-    owner: root
-    group: root
-    mode: 0644
-    seuser: system_u
-    serole: object_r
-    setype: system_cron_spool_t
-    selevel: s0
-  check_mode: true
-  tags:
-    - configuration
+
 
 
 - name: 'linux : configure snmpd daemon'
