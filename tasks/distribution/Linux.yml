@@ -91,9 +91,9 @@
 - name: 'linux : install osupdates unprivileged snmp extension '
   become: true
   block:
-    - name: 'Download osupdates-unpriv-gather.sh'
+    - name: 'Download osupdates-unpriv-generate.sh'
       get_url:
-        url: 'https://github.com/sshockley/librenms-agent/raw/refs/heads/master/snmp/unpriv/osupdates/osupdates-unpriv-gather.sh'
+        url: 'https://github.com/sshockley/librenms-agent/raw/refs/heads/master/snmp/unpriv/osupdates/osupdates-unpriv-generate.sh'
         dest: '{{ snmp_extension_scripts + "/" }}'
         owner: root
         group: root
