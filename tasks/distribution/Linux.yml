@@ -116,7 +116,7 @@
     - name: 'linux : install osupdates crontab'
       template:
         src: 'cron.d/99osupdates-generate.j2'
-        dest: '/etc/cron.d'
+        dest: '/etc/cron.d/99osupdates-generate'
         owner: root
         group: root
         mode: 0644
