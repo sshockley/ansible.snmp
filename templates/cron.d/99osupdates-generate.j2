@@ -3,4 +3,4 @@
 SHELL=/bin/bash
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 MAILTO=root
-*/5 * * * * root {{ snmp_extension_scripts }}/osupdates-unpriv-gather.sh > {{ snmp_persistent_directory }}/osupdates/stats.txt
+*/5 * * * * root {{ snmp_extension_scripts }}/osupdates-unpriv-generate.sh > {{ snmp_persistent_directory }}/osupdates/stats.txt
