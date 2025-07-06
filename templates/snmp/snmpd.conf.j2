@@ -18,6 +18,10 @@ sysName {{ ansible_fqdn }}
 sysContact {{ snmp_contact }}
 {% endif %}
 
+{% if snmp_agentx_enabled is defined and snmp_agentx_enabled | bool %}
+master agentx
+{% endif %}
+
 {% for item in snmp_extension_list %}
 extend {{ item.extend }}
 {% endfor %}

@@ -26,6 +26,7 @@ ansible-galaxy install sbaerlocher.snmp
 | snmp_agentaddress_protocol.ipvX | udp / udp6                                                              | Optional: SNMP Protocol, X for ipv4 or ipv6     |
 | snmp_agentaddress_address.ipvX   | {{ ansible_default_ipv4.address }} / {{ ansible_default_ipv6.address }} | Optional: SNMP bind address, X for ipv4 or ipv6 |
 | snmp_agentaddress_port.ipvX     | 161 / 161                                                               | Optional: SNMP port, X for ipv4 or ipv6         |
+| snmp_agentx_enabled             | false                                                                   | Optional: enable AgentX                         |
 
 ## Dependencies
 
