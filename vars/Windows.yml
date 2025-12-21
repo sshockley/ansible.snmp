@@ -1,7 +1,7 @@
 ---
 # vars file for sbaerlocher.snmp
 
-snmp_resource_name: WindowsFeature
+snmp_resource_name: ansible.windows.win_feature_info
 snmp_name: "SNMP-Service"
 snmp_present: "Present"
 snmp_dsc_name: "DSC-Service"

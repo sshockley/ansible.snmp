@@ -2,7 +2,7 @@
 # tasks file for sbaerlocher.snmp
 
 - name: Check DSC Feature state
-  community.windows.win_feature_info:
+  ansible.windows.win_feature_info:
     name: "{{  snmp_dsc_name }}"
   register: dsc_feature_info
 
