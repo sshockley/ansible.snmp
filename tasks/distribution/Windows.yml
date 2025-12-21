@@ -57,7 +57,7 @@
   when: not snmp_monitoring_server | ipaddr
 
 - name: 'windows : firewall rule to allow ICMP'
-  win_firewall_rule:
+  community.windows.win_firewall_rule:
     name: ICMP
     action: allow
     direction: in
@@ -67,7 +67,7 @@
     enabled: true
 
 - name: 'windows : firewall rule to allow SNMP-Service'
-  win_firewall_rule:
+  community.windows.win_firewall_rule:
     name: SNMP
     action: allow
     direction: in
