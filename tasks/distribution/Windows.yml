@@ -54,7 +54,7 @@
 - name: 'windows : set remote IP-Address'
   set_fact:
     snmp_remoteip: "{{ lookup('dig', snmp_monitoring_server ) }}"
-  when: not snmp_monitoring_server | ipaddr
+  when: not snmp_monitoring_server | ansible.utils.ipaddr
 
 - name: Enable all the Firewall rules in application group
   community.windows.win_firewall_rule:
