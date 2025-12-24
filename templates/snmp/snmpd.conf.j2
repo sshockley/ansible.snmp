@@ -32,4 +32,4 @@ extend proxmox /usr/bin/sudo {{ snmp_extension_scripts }}/proxmox
 extend systemd /usr/bin/cat {{ snmp_persistent_directory }}/systemd
 {% endif %}
 
-extend osupdates /usr/bin/cat {{ snmp_persistent_directory }}/osupdates/stats.txt
+extend osupdate /usr/bin/cat {{ snmp_persistent_directory }}/osupdates/stats.txt
