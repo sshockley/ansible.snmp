@@ -20,6 +20,6 @@
     state: started
 
 - name: Restart win snmp
-  win_service:
+  ansible.windows.win_service:
     name: SNMP
     state: restarted
