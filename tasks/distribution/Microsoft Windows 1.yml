@@ -9,7 +9,7 @@
     name: 'SNMP.Client~~~~0.0.1.0'
 
 - name: 'Windows : setting SNMP'
-  win_regedit:
+  ansible.windows.win_regedit:
     path: 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\SNMP\\Parameters\\{{ item.path }}'
     name: '{{ item.name }}'
     type: '{{ item.type }}'
@@ -40,7 +40,7 @@
   when: not snmp_monitoring_server | ipaddr
 
 - name: 'Windows : firewall rule to allow ICMP'
-  win_firewall_rule:
+  community.windows.win_firewall_rule:
     name: ICMP
     action: allow
     direction: in
@@ -50,7 +50,7 @@
     enabled: true
 
 - name: 'Windows : firewall rule to allow SNMP-Service'
-  win_firewall_rule:
+  community.windows.win_firewall_rule:
     name: SNMP
     action: allow
     direction: in
