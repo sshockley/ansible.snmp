@@ -34,28 +34,28 @@
   notify:
     - Restart win snmp
 
-- name: 'Windows : set remote IP-Address'
-  ansible.builtin.set_fact:
-    snmp_remoteip: "{{ lookup('dig', snmp_monitoring_server) }}"
-  when: not snmp_monitoring_server | ipaddr
+# - name: 'Windows : set remote IP-Address'
+#   ansible.builtin.set_fact:
+#     snmp_remoteip: "{{ lookup('dig', snmp_monitoring_server) }}"
+#   when: not snmp_monitoring_server | ipaddr
 
-- name: 'Windows : firewall rule to allow ICMP'
-  community.windows.win_firewall_rule:
-    name: ICMP
-    action: allow
-    direction: in
-    protocol: ICMPv4
-    remoteip: '{{ snmp_remoteip | default(snmp_monitoring_server) }}'
-    state: present
-    enabled: true
+# - name: 'Windows : firewall rule to allow ICMP'
+#   community.windows.win_firewall_rule:
+#     name: ICMP
+#     action: allow
+#     direction: in
+#     protocol: ICMPv4
+#     remoteip: '{{ snmp_remoteip | default(snmp_monitoring_server) }}'
+#     state: present
+#     enabled: true
 
-- name: 'Windows : firewall rule to allow SNMP-Service'
-  community.windows.win_firewall_rule:
-    name: SNMP
-    action: allow
-    direction: in
-    protocol: UDP
-    localport: '161'
-    remoteip: '{{ snmp_remoteip | default(snmp_monitoring_server) }}'
-    state: present
-    enabled: true
+# - name: 'Windows : firewall rule to allow SNMP-Service'
+#   community.windows.win_firewall_rule:
+#     name: SNMP
+#     action: allow
+#     direction: in
+#     protocol: UDP
+#     localport: '161'
+#     remoteip: '{{ snmp_remoteip | default(snmp_monitoring_server) }}'
+#     state: present
+#     enabled: true
