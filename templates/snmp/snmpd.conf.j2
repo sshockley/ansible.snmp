@@ -26,7 +26,7 @@ master agentx
 extend {{ item.extend }}
 {% endfor %}
 {% if "pve" in ansible_kernel %}
-extend proxmox {{ snmp_extension_scripts }}/proxmox
+extend proxmox /usr/bin/sudo {{ snmp_extension_scripts }}/proxmox
 {% endif %}
 {% if "systemd" in ansible_facts.service_mgr %}
 extend systemd /usr/bin/cat {{ snmp_persistent_directory }}/systemd
