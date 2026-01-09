@@ -134,7 +134,7 @@
   become: true
   tags:
     - configuration
-  when: ansible_facts.ansible_virtualization_role != "systemd"
+  when: ansible_facts.platform_type == "physical"
   block:
     - name: 'Download smart-v1'
       ansible.builtin.get_url:
