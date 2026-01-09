@@ -3,3 +3,4 @@ Bärlocher
 noqa
 sbaerlo
 smartmontools
+sysconfig

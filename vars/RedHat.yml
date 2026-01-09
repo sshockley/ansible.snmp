@@ -8,6 +8,7 @@ snmp_packages:
 smartmontools_packages:
   - smartmontools
   - perl-JSON
+  - perl-IO-Compress
 
 snmp_config: /etc/snmp/snmpd.conf
 snmp_daemon_config: /etc/sysconfig/snmpd
