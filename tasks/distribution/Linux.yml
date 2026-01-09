@@ -160,8 +160,8 @@
         selevel: s0
     - name: 'Linux : install smart-v1 crontab'
       ansible.builtin.template:
-        src: 'cron.d/99osupdates-generate.j2'
-        dest: '/etc/cron.d/99osupdates-generate'
+        src: 'cron.d/99smart-v1.j2'
+        dest: '/etc/cron.d/99smart-v1'
         owner: root
         group: root
         mode: '0644'
