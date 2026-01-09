@@ -130,6 +130,17 @@
   # when: ansible_facts.service_mgr == "systemd"
 
 
+- name: 'Linux : Install smartmontools'
+  become: true
+  tags:
+    - packages
+  when: not ansible_facts['virtualization_role'] == "guest"
+  ansible.builtin.package:
+    name: '{{ item }}'
+  with_items:
+    - '{{ smartmontools_packages }}'
+
+
 - name: 'Linux : install smart-v1 snmp extension '
   become: true
   tags:
@@ -160,16 +171,6 @@
         selevel: s0
     - name: 'Linux - Generate smart-v1 config file' # noqa: command-instead-of-shell no-changed-when
       ansible.builtin.shell: '{{ snmp_extension_scripts + "/smart-v1 -g -C > " + snmp_extension_scripts + "/smart-v1.config" }}'
-
-- name: 'Linux : Install smartmontools'
-  become: true
-  tags:
-    - packages
-  when: not ansible_facts['virtualization_role'] == "guest"
-  ansible.builtin.package:
-    name: '{{ item }}'
-  with_items:
-    - '{{ smartmontools_packages }}'
 
 
 - name: 'Linux : configure snmpd daemon'
