@@ -129,6 +129,39 @@
         selevel: s0
   # when: ansible_facts.service_mgr == "systemd"
 
+
+- name: 'Linux : install smart-v1 snmp extension '
+  become: true
+  tags:
+    - configuration
+  when: ansible_facts.ansible_virtualization_role != "systemd"
+  block:
+    - name: 'Download smart-v1'
+      ansible.builtin.get_url:
+        url: 'https://raw.githubusercontent.com/sshockley/librenms-agent/refs/heads/master/snmp/smart-v1'
+        dest: '{{ snmp_extension_scripts + "/" }}'
+        owner: root
+        group: root
+        mode: '0755'
+        seuser: system_u
+        serole: object_r
+        setype: lib_t
+        selevel: s0
+    - name: 'Linux : install smart-v1 crontab'
+      ansible.builtin.template:
+        src: 'cron.d/99osupdates-generate.j2'
+        dest: '/etc/cron.d/99osupdates-generate'
+        owner: root
+        group: root
+        mode: '0644'
+        seuser: system_u
+        serole: object_r
+        setype: system_cron_spool_t
+        selevel: s0
+    - name: 'Linux - Generate smart-v1 config file' # noqa: command-instead-of-shell no-changed-when
+      ansible.builtin.shell: '{{ snmp_extension_scripts + "/smart-v1 -g -C > " + snmp_extension_scripts + "/smart-v1.config" }}'
+
+
 - name: 'Linux : configure snmpd daemon'
   become: true
   ansible.builtin.template:
