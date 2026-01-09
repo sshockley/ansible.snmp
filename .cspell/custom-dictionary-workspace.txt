@@ -2,3 +2,4 @@
 Bärlocher
 noqa
 sbaerlo
+smartmontools

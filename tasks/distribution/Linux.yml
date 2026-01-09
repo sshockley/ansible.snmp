@@ -134,7 +134,7 @@
   become: true
   tags:
     - configuration
-  when: ansible_facts.platform_type == "physical"
+  when: not ansible_facts.ansible_virtualization_role == "guest"
   block:
     - name: 'Download smart-v1'
       ansible.builtin.get_url:
@@ -161,6 +161,13 @@
     - name: 'Linux - Generate smart-v1 config file' # noqa: command-instead-of-shell no-changed-when
       ansible.builtin.shell: '{{ snmp_extension_scripts + "/smart-v1 -g -C > " + snmp_extension_scripts + "/smart-v1.config" }}'
 
+- name: 'Linux : Install smartmontools'
+  become: true
+  tags:
+    - packages
+  when: not ansible_facts.ansible_virtualization_role == "guest"
+  ansible.builtin.package:
+    name: 'smartmontools'
 
 - name: 'Linux : configure snmpd daemon'
   become: true
