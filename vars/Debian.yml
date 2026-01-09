@@ -5,6 +5,10 @@ snmp_packages:
   - snmp
   - snmpd
 
+smartmontools_packages:
+  - smartmontools
+  - libjson-perl
+
 snmp_config: '/etc/snmp/snmpd.conf'
 snmp_daemon_config: '/etc/default/snmpd'
 snmp_deamon_group: 'Debian-snmp'

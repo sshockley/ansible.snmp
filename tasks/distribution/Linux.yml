@@ -167,7 +167,10 @@
     - packages
   when: not ansible_facts['virtualization_role'] == "guest"
   ansible.builtin.package:
-    name: 'smartmontools'
+    name: '{{ item }}'
+  with_items:
+    - '{{ smartmontools_packages }}'
+
 
 - name: 'Linux : configure snmpd daemon'
   become: true
