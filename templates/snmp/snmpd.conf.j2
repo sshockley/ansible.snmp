@@ -31,5 +31,7 @@ extend proxmox /usr/bin/sudo {{ snmp_extension_scripts }}/proxmox
 {% if "systemd" in ansible_facts.service_mgr %}
 extend systemd /usr/bin/cat {{ snmp_persistent_directory }}/systemd
 {% endif %}
-
+{% if not "guest" == ansible_virtualization_role %}
+extend smart {{ snmp_extension_scripts }}/smart-v1
+{% endif %}
 extend osupdate /usr/bin/cat {{ snmp_persistent_directory }}/osupdates/stats.txt
