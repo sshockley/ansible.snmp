@@ -1,5 +1,7 @@
 # Custom Dictionary Words
 Bärlocher
+libjson
+Lsed
 noqa
 sbaerlo
 smartmontools
