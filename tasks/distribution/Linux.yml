@@ -146,8 +146,8 @@
         selevel: s0
     - name: "Linux : install librenms-systemd crontab"
       ansible.builtin.template:
-        src: "cron.d/99systemd-generate.conf.j2"
-        dest: "/etc/cron.d/99systemd-generate.conf"
+        src: "cron.d/99systemd-generate.j2"
+        dest: "/etc/cron.d/99systemd-generate"
         owner: root
         group: root
         mode: "0644"
@@ -174,8 +174,8 @@
         selevel: s0
     - name: "Linux : install osupdates crontab"
       ansible.builtin.template:
-        src: "cron.d/99osupdates-generate.conf.j2"
-        dest: "/etc/cron.d/99osupdates-generate.conf"
+        src: "cron.d/99osupdates-generate.j2"
+        dest: "/etc/cron.d/99osupdates-generate"
         owner: root
         group: root
         mode: "0644"
@@ -226,8 +226,8 @@
         selevel: s0
     - name: "Linux : install smart-v1 crontab"
       ansible.builtin.template:
-        src: "cron.d/99smart-v1.conf.j2"
-        dest: "/etc/cron.d/99smart-v1.conf"
+        src: "cron.d/99smart-v1.j2"
+        dest: "/etc/cron.d/99smart-v1"
         owner: root
         group: root
         mode: "0644"
