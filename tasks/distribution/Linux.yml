@@ -244,7 +244,7 @@
         serole: object_r
         setype: system_cron_spool_t
         selevel: s0
-    - name: 'Linux : install librenms-smart-v1 snmpd config'
+    - name: 'Linux : install smart-v1 snmpd config'
       ansible.builtin.template:
         src: 'snmp/snmpd.conf.d/smart-v1.j2'
         dest: '{{ snmp_confdir }}/snmpd.conf.d/smart-v1'
@@ -257,15 +257,13 @@
         selevel: s0
     - name: 'Linux - Generate smart-v1 config file' # noqa: command-instead-of-shell no-changed-when
       ansible.builtin.shell: '{{ snmp_extension_scripts + "/smart-v1 -g -C > " + snmp_extension_scripts + "/smart-v1.config" }}'
-
-
-- name: 'Linux : Fix snmp_persistent_directory'
-  when: ansible_facts['os_family'] == "RedHat"
-  become: true
-  ansible.builtin.replace:
-    path: '{{ snmp_extension_scripts + "/smart-v1.config" }}'
-    regexp: 'my $cache    = ''/var/cache/smart'';'
-    replace: '{{ "my $cache    = ''" + snmp_persistent_directory + "/smart'';" }}'
+    - name: 'Linux : Fix snmp_persistent_directory'
+      when: ansible_facts['os_family'] == "RedHat"
+      become: true
+      ansible.builtin.replace:
+        path: '{{ snmp_extension_scripts + "/smart-v1.config" }}'
+        regexp: 'my $cache    = ''/var/cache/smart'';'
+        replace: '{{ "my $cache    = ''" + snmp_persistent_directory + "/smart'';" }}'
 
 
 - name: 'Linux : configure snmpd daemon'
