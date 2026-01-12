@@ -41,7 +41,7 @@
     setype: lib_t
     selevel: s0
 
-- name: "Linux : Install snmp extensions"
+- name: "Linux : Install snmp extensions from snmp_extension_list"
   become: true
   tags:
     - configuration
@@ -106,7 +106,7 @@
         selevel: s0
     - name: "Linux : install librenms-linux_config_files snmpd config"
       ansible.builtin.template:
-        src: "snmp/snmpd.conf.d/systemd.j2"
+        src: "snmp/snmpd.conf.d/linux_config_files.j2"
         dest: "{{ snmp_confdir }}/snmpd.conf.d/linux_config_files"
         owner: root
         group: root
