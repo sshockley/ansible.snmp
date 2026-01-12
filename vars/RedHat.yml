@@ -3,7 +3,7 @@
 
 snmp_packages:
   - net-snmp
-  - net-snmp-utils
+#  - net-snmp-utils
 
 smartmontools_packages:
   - smartmontools
