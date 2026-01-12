@@ -16,7 +16,7 @@
   tags:
     - configuration
   ansible.builtin.file:
-    path: '{{ snmp_config + "/snmpd.conf.d" }}'
+    path: '{{ snmp_confdir + "/snmpd.conf.d" }}'
     state: directory
     owner: root
     group: root
