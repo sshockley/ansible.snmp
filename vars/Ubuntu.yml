@@ -12,8 +12,8 @@ smartmontools_packages:
 snmp_confdir: /etc/snmp
 snmp_config: '/etc/snmp/snmpd.conf'
 snmp_daemon_config: '/etc/default/snmpd'
-snmp_deamon_group: 'Debian-snmp'
-snmp_deamon_user: 'Debian-snmp'
+snmp_daemon_group: 'Debian-snmp'
+snmp_daemon_user: 'Debian-snmp'
 snmp_logging_options: '-Lsd'
 snmp_service_name: 'snmpd'
 snmp_persistent_directory: '/var/lib/snmp'
