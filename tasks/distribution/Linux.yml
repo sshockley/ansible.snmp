@@ -75,7 +75,7 @@
         serole: object_r
         setype: lib_t
         selevel: s0
-    - name: "Linux : install librenms-proxmox snmpd config"
+    - name: "Linux : install proxmox snmpd config"
       ansible.builtin.template:
         src: "snmp/snmpd.conf.d/proxmox.conf.j2"
         dest: "{{ snmp_confdir }}/snmpd.conf.d/proxmox.conf"
@@ -93,7 +93,7 @@
     - configuration
   when: ansible_facts['os_family'] == "RedHat"
   block:
-    - name: "Download librenms-linux_config_files snmp extension"
+    - name: "Download linux_config_files snmp extension"
       ansible.builtin.get_url:
         url: '{{ snmp_librenms_repo + "/snmp/linux_config_files.py" }}'
         dest: '{{ snmp_extension_scripts + "/" }}'
@@ -104,7 +104,7 @@
         serole: object_r
         setype: lib_t
         selevel: s0
-    - name: "Linux : install librenms-linux_config_files snmpd config"
+    - name: "Linux : install linux_config_files snmpd config"
       ansible.builtin.template:
         src: "snmp/snmpd.conf.d/linux_config_files.conf.j2"
         dest: "{{ snmp_confdir }}/snmpd.conf.d/linux_config_files.conf"
@@ -122,7 +122,7 @@
     - configuration
   when: ansible_facts.service_mgr == "systemd"
   block:
-    - name: "Download librenms-systemd snmp extension"
+    - name: "Download systemd snmp extension"
       ansible.builtin.get_url:
         url: '{{ snmp_librenms_repo + "/snmp/unpriv/systemd/systemd.py" }}'
         dest: '{{ snmp_extension_scripts + "/" }}'
@@ -133,7 +133,7 @@
         serole: object_r
         setype: lib_t
         selevel: s0
-    - name: "Linux : install librenms-systemd snmpd config"
+    - name: "Linux : install systemd snmpd config"
       ansible.builtin.template:
         src: "snmp/snmpd.conf.d/systemd.conf.j2"
         dest: "{{ snmp_confdir }}/snmpd.conf.d/systemd.conf"
@@ -144,7 +144,7 @@
         serole: object_r
         setype: etc_t
         selevel: s0
-    - name: "Linux : install librenms-systemd crontab"
+    - name: "Linux : install systemd crontab"
       ansible.builtin.template:
         src: "cron.d/99systemd-generate.j2"
         dest: "/etc/cron.d/99systemd-generate"
@@ -154,6 +154,34 @@
         seuser: system_u
         serole: object_r
         setype: system_cron_spool_t
+        selevel: s0
+
+- name: "Linux : install distro snmp extension"
+  become: true
+  tags:
+    - configuration
+  block:
+    - name: "Download distro snmp extension"
+      ansible.builtin.get_url:
+        url: '{{ snmp_librenms_repo + "/snmp/distro" }}'
+        dest: '{{ snmp_extension_scripts + "/" }}'
+        owner: root
+        group: root
+        mode: "0755"
+        seuser: system_u
+        serole: object_r
+        setype: lib_t
+        selevel: s0
+    - name: "Linux : install distro snmpd config"
+      ansible.builtin.template:
+        src: "snmp/snmpd.conf.d/distro.conf.j2"
+        dest: "{{ snmp_confdir }}/snmpd.conf.d/distro.conf"
+        owner: root
+        group: root
+        mode: "0600"
+        seuser: system_u
+        serole: object_r
+        setype: etc_t
         selevel: s0
 
 - name: "Linux : install osupdates unprivileged snmp extension "
@@ -183,7 +211,7 @@
         serole: object_r
         setype: system_cron_spool_t
         selevel: s0
-    - name: "Linux : install librenms-osupdates snmpd config"
+    - name: "Linux : install osupdates snmpd config"
       ansible.builtin.template:
         src: "snmp/snmpd.conf.d/osupdates.conf.j2"
         dest: "{{ snmp_confdir }}/snmpd.conf.d/osupdates.conf"
