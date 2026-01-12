@@ -77,8 +77,8 @@
         selevel: s0
     - name: "Linux : install librenms-proxmox snmpd config"
       ansible.builtin.template:
-        src: "snmp/snmpd.conf.d/proxmox.j2"
-        dest: "{{ snmp_confdir }}/snmpd.conf.d/proxmox"
+        src: "snmp/snmpd.conf.d/proxmox.conf.j2"
+        dest: "{{ snmp_confdir }}/snmpd.conf.d/proxmox.conf"
         owner: root
         group: root
         mode: "0600"
@@ -106,8 +106,8 @@
         selevel: s0
     - name: "Linux : install librenms-linux_config_files snmpd config"
       ansible.builtin.template:
-        src: "snmp/snmpd.conf.d/linux_config_files.j2"
-        dest: "{{ snmp_confdir }}/snmpd.conf.d/linux_config_files"
+        src: "snmp/snmpd.conf.d/linux_config_files.conf.j2"
+        dest: "{{ snmp_confdir }}/snmpd.conf.d/linux_config_files.conf"
         owner: root
         group: root
         mode: "0600"
@@ -135,8 +135,8 @@
         selevel: s0
     - name: "Linux : install librenms-systemd snmpd config"
       ansible.builtin.template:
-        src: "snmp/snmpd.conf.d/systemd.j2"
-        dest: "{{ snmp_confdir }}/snmpd.conf.d/systemd"
+        src: "snmp/snmpd.conf.d/systemd.conf.j2"
+        dest: "{{ snmp_confdir }}/snmpd.conf.d/systemd.conf"
         owner: root
         group: root
         mode: "0600"
@@ -146,8 +146,8 @@
         selevel: s0
     - name: "Linux : install librenms-systemd crontab"
       ansible.builtin.template:
-        src: "cron.d/99systemd-generate.j2"
-        dest: "/etc/cron.d/99systemd-generate"
+        src: "cron.d/99systemd-generate.conf.j2"
+        dest: "/etc/cron.d/99systemd-generate.conf"
         owner: root
         group: root
         mode: "0644"
@@ -174,8 +174,8 @@
         selevel: s0
     - name: "Linux : install osupdates crontab"
       ansible.builtin.template:
-        src: "cron.d/99osupdates-generate.j2"
-        dest: "/etc/cron.d/99osupdates-generate"
+        src: "cron.d/99osupdates-generate.conf.j2"
+        dest: "/etc/cron.d/99osupdates-generate.conf"
         owner: root
         group: root
         mode: "0644"
@@ -185,8 +185,8 @@
         selevel: s0
     - name: "Linux : install librenms-osupdates snmpd config"
       ansible.builtin.template:
-        src: "snmp/snmpd.conf.d/osupdates.j2"
-        dest: "{{ snmp_confdir }}/snmpd.conf.d/osupdates"
+        src: "snmp/snmpd.conf.d/osupdates.conf.j2"
+        dest: "{{ snmp_confdir }}/snmpd.conf.d/osupdates.conf"
         owner: root
         group: root
         mode: "0600"
@@ -226,8 +226,8 @@
         selevel: s0
     - name: "Linux : install smart-v1 crontab"
       ansible.builtin.template:
-        src: "cron.d/99smart-v1.j2"
-        dest: "/etc/cron.d/99smart-v1"
+        src: "cron.d/99smart-v1.conf.j2"
+        dest: "/etc/cron.d/99smart-v1.conf"
         owner: root
         group: root
         mode: "0644"
@@ -237,8 +237,8 @@
         selevel: s0
     - name: "Linux : install smart-v1 snmpd config"
       ansible.builtin.template:
-        src: "snmp/snmpd.conf.d/smart-v1.j2"
-        dest: "{{ snmp_confdir }}/snmpd.conf.d/smart-v1"
+        src: "snmp/snmpd.conf.d/smart-v1.conf.j2"
+        dest: "{{ snmp_confdir }}/snmpd.conf.d/smart-v1.conf"
         owner: root
         group: root
         mode: "0600"
@@ -316,8 +316,8 @@
         - Enabled snmp
     - name: "Linux : install snmpd extensions config"
       ansible.builtin.template:
-        src: "snmp/snmpd.conf.d/extensions.j2"
-        dest: "{{ snmp_confdir }}/snmpd.conf.d/extensions"
+        src: "snmp/snmpd.conf.d/extensions.conf.j2"
+        dest: "{{ snmp_confdir }}/snmpd.conf.d/extensions.conf"
         owner: root
         group: root
         mode: "0600"
