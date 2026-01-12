@@ -1,0 +1,1 @@
+extend osupdate /usr/bin/cat {{ snmp_persistent_directory }}/osupdates.txt

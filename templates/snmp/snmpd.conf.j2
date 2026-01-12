@@ -36,4 +36,4 @@ extend systemd /usr/bin/cat {{ snmp_persistent_directory }}/systemd
 {% if not "guest" == ansible_virtualization_role %}
 extend smart {{ snmp_extension_scripts }}/smart-v1
 {% endif %}
-extend osupdate /usr/bin/cat {{ snmp_persistent_directory }}/osupdates/stats.txt
+
