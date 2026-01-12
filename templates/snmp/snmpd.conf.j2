@@ -22,6 +22,8 @@ sysContact {{ snmp_contact }}
 master agentx
 {% endif %}
 
+includeDir /etc/snmp/snmpd.conf.d
+
 {% for item in snmp_extension_list %}
 extend {{ item.extend }}
 {% endfor %}

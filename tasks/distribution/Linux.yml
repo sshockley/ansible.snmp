@@ -11,6 +11,21 @@
     - '{{ snmp_packages }}'
     - '{{ snmp_additional_packages }}'
 
+- name: 'Linux : Create snmpd include directory'
+  become: true
+  tags:
+    - configuration
+  ansible.builtin.file:
+    path: '{{ snmp_config + "/snmpd.conf.d" }}'
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+    seuser: system_u
+    serole: object_r
+    setype: lib_t
+    selevel: s0
+
 - name: 'Linux : Create snmp extension directory'
   become: true
   tags:
