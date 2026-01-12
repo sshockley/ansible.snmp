@@ -177,7 +177,8 @@
   become: true
   tags:
     - packages
-  when: not ansible_facts['virtualization_role'] == "guest"
+  when: not ansible_facts['virtualization_role'] == "guest" and
+        not snmp_exclude_smart
   ansible.builtin.package:
     name: '{{ item }}'
   with_items:
@@ -188,7 +189,8 @@
   become: true
   tags:
     - configuration
-  when: not ansible_facts['virtualization_role'] == "guest"
+  when: not ansible_facts['virtualization_role'] == "guest" and
+        not snmp_exclude_smart
   block:
     - name: 'Download smart-v1'
       ansible.builtin.get_url:
