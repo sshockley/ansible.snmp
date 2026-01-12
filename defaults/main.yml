@@ -10,6 +10,8 @@ snmp_monitoring_server: 0.0.0.0
 snmp_password: snmp_password
 snmp_user: snmp
 
+snmp_librenms_repo: 'https://github.com/sshockley/librenms-agent/raw/refs/heads/master'
+
 snmp_agentaddress_protocol:
   ipv4: udp
   ipv6: udp6

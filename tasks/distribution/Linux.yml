@@ -26,6 +26,7 @@
     setype: lib_t
     selevel: s0
 
+
 - name: 'Linux : Create snmp extension directory'
   become: true
   tags:
@@ -41,7 +42,8 @@
     setype: lib_t
     selevel: s0
 
-- name: 'Linux : Install snmp extension'
+
+- name: 'Linux : Install snmp extensions'
   become: true
   tags:
     - configuration
@@ -58,21 +60,36 @@
   with_items:
     - "{{ snmp_extension_list }}"
 
-- name: 'Linux : Install snmp extension proxmox'
+
+- name: 'Linux : Install proxmox snmp extension'
   become: true
   tags:
     - configuration
-  ansible.builtin.get_url:
-    url: 'https://raw.githubusercontent.com/sshockley/librenms-agent/master/agent-local/proxmox'
-    dest: '{{ snmp_extension_scripts + "/" }}'
-    owner: root
-    group: root
-    mode: '0755'
-    seuser: system_u
-    serole: object_r
-    setype: lib_t
-    selevel: s0
   when: '"pve" in ansible_kernel'
+  block:
+    - name: 'Linux : Download Proxmox extension'
+      ansible.builtin.get_url:
+        url: '{{ snmp_librenms_repo + "/agent-local/proxmox" }}'
+        dest: '{{ snmp_extension_scripts + "/" }}'
+        owner: root
+        group: root
+        mode: '0755'
+        seuser: system_u
+        serole: object_r
+        setype: lib_t
+        selevel: s0
+    - name: 'Linux : install librenms-proxmox snmpd config'
+      ansible.builtin.template:
+        src: 'snmp/snmpd.conf.d/proxmox.j2'
+        dest: '{{ snmp_daemon_config }}/snmpd.conf.d/proxmox'
+        owner: root
+        group: root
+        mode: '0600'
+        seuser: system_u
+        serole: object_r
+        setype: etc_t
+        selevel: s0
+
 
 - name: 'Linux : install systemd snmp extension'
   become: true
@@ -82,7 +99,7 @@
   block:
     - name: 'Download librenms-systemd snmp extension'
       ansible.builtin.get_url:
-        url: 'https://github.com/sshockley/librenms-agent/raw/refs/heads/master/snmp/unpriv/systemd/systemd.py'
+        url: '{{ snmp_librenms_repo + "/snmp/unpriv/systemd/systemd.py" }}'
         dest: '{{ snmp_extension_scripts + "/" }}'
         owner: root
         group: root
@@ -90,6 +107,17 @@
         seuser: system_u
         serole: object_r
         setype: lib_t
+        selevel: s0
+    - name: 'Linux : install librenms-systemd snmpd config'
+      ansible.builtin.template:
+        src: 'snmp/snmpd.conf.d/systemd.j2'
+        dest: '{{ snmp_daemon_config }}/snmpd.conf.d/systemd'
+        owner: root
+        group: root
+        mode: '0600'
+        seuser: system_u
+        serole: object_r
+        setype: etc_t
         selevel: s0
     - name: 'Linux : install librenms-systemd crontab'
       ansible.builtin.template:
@@ -103,6 +131,7 @@
         setype: system_cron_spool_t
         selevel: s0
 
+
 - name: 'Linux : install osupdates unprivileged snmp extension '
   become: true
   tags:
@@ -110,7 +139,7 @@
   block:
     - name: 'Download osupdates-unpriv-generate.sh'
       ansible.builtin.get_url:
-        url: 'https://github.com/sshockley/librenms-agent/raw/refs/heads/master/snmp/unpriv/osupdates/osupdates-unpriv-generate.sh'
+        url: '{{ snmp_librenms_repo + "/snmp/unpriv/osupdates/osupdates-unpriv-generate.sh" }}'
         dest: '{{ snmp_extension_scripts + "/" }}'
         owner: root
         group: root
@@ -130,19 +159,17 @@
         serole: object_r
         setype: system_cron_spool_t
         selevel: s0
-    - name: 'Linux : Create osupdates directory'
-      become: true
-      ansible.builtin.file:
-        path: '{{ snmp_persistent_directory }}/osupdates'
-        state: directory
+    - name: 'Linux : install librenms-osupdates snmpd config'
+      ansible.builtin.template:
+        src: 'snmp/snmpd.conf.d/osupdates.j2'
+        dest: '{{ snmp_daemon_config }}/snmpd.conf.d/osupdates'
         owner: root
         group: root
-        mode: '0755'
+        mode: '0600'
         seuser: system_u
         serole: object_r
-        setype: snmpd_var_lib_t
+        setype: etc_t
         selevel: s0
-  # when: ansible_facts.service_mgr == "systemd"
 
 
 - name: 'Linux : Install smartmontools'
@@ -164,7 +191,7 @@
   block:
     - name: 'Download smart-v1'
       ansible.builtin.get_url:
-        url: 'https://raw.githubusercontent.com/sshockley/librenms-agent/refs/heads/master/snmp/smart-v1'
+        url: '{{ snmp_librenms_repo + "/snmp/smart-v1" }}'
         dest: '{{ snmp_extension_scripts + "/" }}'
         owner: root
         group: root
@@ -212,6 +239,7 @@
   notify:
     - Restart snmp
 
+
 - name: 'Linux : check create snmp config'
   become: true
   tags:
@@ -228,6 +256,7 @@
     selevel: s0
   register: check_snmp
   check_mode: true
+
 
 - name: 'Linux : Configure snmp'
   when: check_snmp.changed

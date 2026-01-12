@@ -1,0 +1,3 @@
+{% if not "guest" == ansible_virtualization_role %}
+extend smart {{ snmp_extension_scripts }}/smart-v1
+{% endif %}
