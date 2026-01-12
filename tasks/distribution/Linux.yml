@@ -163,7 +163,7 @@
     - name: 'Linux : install librenms-osupdates snmpd config'
       ansible.builtin.template:
         src: 'snmp/snmpd.conf.d/osupdates.j2'
-        dest: '{{ snmp_daemon_config }}/snmpd.conf.d/osupdates'
+        dest: '{{ snmp_confdir }}/snmpd.conf.d/osupdates'
         owner: root
         group: root
         mode: '0600'
