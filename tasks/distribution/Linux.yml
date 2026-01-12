@@ -81,7 +81,7 @@
     - name: 'Linux : install librenms-proxmox snmpd config'
       ansible.builtin.template:
         src: 'snmp/snmpd.conf.d/proxmox.j2'
-        dest: '{{ snmp_daemon_config }}/snmpd.conf.d/proxmox'
+        dest: '{{ snmp_confdir }}/snmpd.conf.d/proxmox'
         owner: root
         group: root
         mode: '0600'
@@ -111,7 +111,7 @@
     - name: 'Linux : install librenms-systemd snmpd config'
       ansible.builtin.template:
         src: 'snmp/snmpd.conf.d/systemd.j2'
-        dest: '{{ snmp_daemon_config }}/snmpd.conf.d/systemd'
+        dest: '{{ snmp_confdir }}/snmpd.conf.d/systemd'
         owner: root
         group: root
         mode: '0600'
