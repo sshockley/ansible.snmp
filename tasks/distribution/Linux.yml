@@ -11,6 +11,7 @@
     - '{{ snmp_packages }}'
     - '{{ snmp_additional_packages }}'
 
+
 - name: 'Linux : Create snmpd include directory'
   become: true
   tags:
