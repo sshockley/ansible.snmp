@@ -92,6 +92,36 @@
         selevel: s0
 
 
+- name: 'Linux : install linux_config_files snmp extension'
+  become: true
+  tags:
+    - configuration
+  when: ansible_facts['os_family'] == "RedHat"
+  block:
+    - name: 'Download librenms-linux_config_files snmp extension'
+      ansible.builtin.get_url:
+        url: '{{ snmp_librenms_repo + "/snmp/linux_config_files.py" }}'
+        dest: '{{ snmp_extension_scripts + "/" }}'
+        owner: root
+        group: root
+        mode: '0755'
+        seuser: system_u
+        serole: object_r
+        setype: lib_t
+        selevel: s0
+    - name: 'Linux : install librenms-linux_config_files snmpd config'
+      ansible.builtin.template:
+        src: 'snmp/snmpd.conf.d/systemd.j2'
+        dest: '{{ snmp_confdir }}/snmpd.conf.d/linux_config_files'
+        owner: root
+        group: root
+        mode: '0600'
+        seuser: system_u
+        serole: object_r
+        setype: etc_t
+        selevel: s0
+
+
 - name: 'Linux : install systemd snmp extension'
   become: true
   tags:
