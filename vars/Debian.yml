@@ -5,6 +5,12 @@ snmp_packages:
   - snmp
   - snmpd
 
+zfs_packages:
+  - File::Slurp
+  - MIME::Base64
+  - JSON
+
+
 smartmontools_packages:
   - smartmontools
   - libjson-perl
