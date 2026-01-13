@@ -1,6 +1,7 @@
 # Custom Dictionary Words
 Bärlocher
 confdir
+libfile
 libjson
 Lsed
 noqa
