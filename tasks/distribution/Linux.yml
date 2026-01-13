@@ -227,8 +227,12 @@
         serole: object_r
         setype: etc_t
         selevel: s0
-    - name: "Linux - Configure SELinux" # noqa: command-instead-of-shell no-changed-when
-      ansible.builtin.shell: '/usr/bin/env semodule -i {{ snmp_confdir }}/snmp_nfs.te'
+    - name: "Linux - Configure SELinux checkmodule" # noqa: command-instead-of-shell no-changed-when
+      ansible.builtin.shell: '/usr/bin/env checkmodule -M -m -o {{ snmp_confdir }}/snmp_nfs.mod {{ snmp_confdir }}/snmp_nfs.te'
+    - name: "Linux - Configure SELinux package" # noqa: command-instead-of-shell no-changed-when
+      ansible.builtin.shell: '/usr/bin/env semodule_package -m {{ snmp_confdir }}/snmp_nfs.mod -o {{ snmp_confdir }}/snmp_nfs.pp'
+    - name: "Linux - Configure SELinux package install" # noqa: command-instead-of-shell no-changed-when
+      ansible.builtin.shell: '/usr/bin/env semodule -i {{ snmp_confdir }}/snmp_nfs.pp'
     - name: "Linux : Install zfs script dependencies"
       become: true
       tags:
