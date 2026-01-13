@@ -184,6 +184,10 @@
         setype: etc_t
         selevel: s0
 
+- name: Gather the package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
 - name: "Linux : install zfs snmp extension"
   become: true
   tags:
