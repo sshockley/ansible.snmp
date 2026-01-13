@@ -216,6 +216,19 @@
         serole: object_r
         setype: etc_t
         selevel: s0
+    - name: "Linux : Create SELinux configuration file"
+      ansible.builtin.get_url:
+        url: '{{ snmp_librenms_repo + "/snmp/snmp_nfs_zfs.te" }}'
+        dest: '{{ snmp_confdir + "/" }}'
+        owner: root
+        group: root
+        mode: "0755"
+        seuser: system_u
+        serole: object_r
+        setype: etc_t
+        selevel: s0
+    - name: "Linux - Configure SELinux" # noqa: command-instead-of-shell no-changed-when
+      ansible.builtin.shell: '/usr/bin/env semodule -i {{ snmp_confdir }}/snmp_nfs.te'
     - name: "Linux : Install zfs script dependencies"
       become: true
       tags:
@@ -315,6 +328,11 @@
         serole: object_r
         setype: etc_t
         selevel: s0
+    - name: "Linux : configure selinux for smart-v1 cache file"
+      community.general.sefcontext:
+        target: '/var/cache/smart'
+        setype: snmpd_var_lib_t
+        state: present
     - name: "Linux - Generate smart-v1 config file" # noqa: command-instead-of-shell no-changed-when
       ansible.builtin.shell: '{{ snmp_extension_scripts + "/smart-v1 -g -C > " + snmp_extension_scripts + "/smart-v1.config" }}'
     - name: "Linux : Fix snmp_persistent_directory"

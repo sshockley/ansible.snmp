@@ -6,5 +6,7 @@ libjson
 Lsed
 noqa
 sbaerlo
+sefcontext
+semodule
 smartmontools
 sysconfig
