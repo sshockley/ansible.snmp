@@ -10,7 +10,6 @@ zfs_packages:
   - MIME::Base64
   - JSON
 
-
 smartmontools_packages:
   - smartmontools
   - libjson-perl

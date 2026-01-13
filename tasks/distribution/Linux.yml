@@ -192,7 +192,7 @@
   become: true
   tags:
     - configuration
-  when: "'zfs' in ansible_facts.packages"
+  when: "'zfs' in ansible_facts.packages or 'zfs-zed' in ansible_facts.packages"
   block:
     - name: "Download zfs snmp extension"
       ansible.builtin.get_url:
