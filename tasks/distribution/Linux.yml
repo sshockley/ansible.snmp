@@ -184,6 +184,43 @@
         setype: etc_t
         selevel: s0
 
+- name: "Linux : install zfs snmp extension"
+  become: true
+  tags:
+    - configuration
+  when: "'zfs' in ansible_facts.packages"
+  block:
+    - name: "Download zfs snmp extension"
+      ansible.builtin.get_url:
+        url: '{{ snmp_librenms_repo + "/snmp/zfs" }}'
+        dest: '{{ snmp_extension_scripts + "/" }}'
+        owner: root
+        group: root
+        mode: "0755"
+        seuser: system_u
+        serole: object_r
+        setype: lib_t
+        selevel: s0
+    - name: "Linux : install zfs snmpd config"
+      ansible.builtin.template:
+        src: "snmp/snmpd.conf.d/zfs.conf.j2"
+        dest: "{{ snmp_confdir }}/snmpd.conf.d/zfs.conf"
+        owner: root
+        group: root
+        mode: "0600"
+        seuser: system_u
+        serole: object_r
+        setype: etc_t
+        selevel: s0
+    - name: "Linux : Install zfs script dependencies"
+      become: true
+      tags:
+        - packages
+      ansible.builtin.package:
+        name: "{{ item }}"
+      with_items:
+        - "{{ zfs_packages }}"
+
 - name: "Linux : install osupdates unprivileged snmp extension "
   become: true
   tags:

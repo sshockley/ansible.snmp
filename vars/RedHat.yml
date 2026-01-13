@@ -5,6 +5,11 @@ snmp_packages:
   - net-snmp
 #  - net-snmp-utils
 
+zfs_packages:
+  - perl-JSON
+  - perl-File-Slurp
+  - perl-MIME-Base64
+
 smartmontools_packages:
   - smartmontools
   - perl-JSON
