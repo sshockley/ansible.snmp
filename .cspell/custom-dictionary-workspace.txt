@@ -6,6 +6,7 @@ libfile
 libjson
 Lsed
 noqa
+rpmconf
 sbaerlo
 sefcontext
 semodule

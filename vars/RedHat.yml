@@ -10,6 +10,10 @@ zfs_packages:
   - perl-File-Slurp
   - perl-MIME-Base64
 
+linux_config_files_packages:
+  - python-unversioned-command
+  - rpmconf
+
 smartmontools_packages:
   - smartmontools
   - perl-JSON
