@@ -336,6 +336,7 @@
         setype: etc_t
         selevel: s0
     - name: "Linux : configure selinux for smart-v1 cache file"
+      when: ansible_facts['os_family'] == "RedHat"
       community.general.sefcontext:
         target: '/var/cache/smart'
         setype: snmpd_var_lib_t
