@@ -93,6 +93,18 @@
     - configuration
   when: ansible_facts['os_family'] == "RedHat"
   block:
+    - name: "Linux : Install EPEL repository"
+      become: true
+      tags:
+        - packages
+      ansible.builtin.package:
+        name: epel-release
+    - name: "Linux : Install linux_config_files script dependencies"
+      become: true
+      tags:
+        - packages
+      ansible.builtin.package:
+        name: "{{ linux_config_files_packages }}"
     - name: "Download linux_config_files snmp extension"
       ansible.builtin.get_url:
         url: '{{ snmp_librenms_repo + "/snmp/linux_config_files.py" }}'
@@ -115,14 +127,6 @@
         serole: object_r
         setype: etc_t
         selevel: s0
-    - name: "Linux : Install linux_config_files script dependencies"
-      become: true
-      tags:
-        - packages
-      ansible.builtin.package:
-        name: "{{ item }}"
-      with_items:
-        - "{{ linux_config_files_packages }}"
 
 - name: "Linux : install systemd snmp extension"
   become: true
