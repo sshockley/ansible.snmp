@@ -6,10 +6,7 @@
   tags:
     - packages
   ansible.builtin.package:
-    name: "{{ item }}"
-  with_items:
-    - "{{ snmp_packages }}"
-    - "{{ snmp_additional_packages }}"
+    name: "{{ snmp_packages + snmp_additional_packages }}"
 
 - name: "Linux : Create snmpd include directory"
   become: true
@@ -55,7 +52,7 @@
     serole: object_r
     setype: lib_t
     selevel: s0
-  with_items:
+  loop:
     - "{{ snmp_extension_list }}"
 
 - name: "Linux : Install proxmox snmp extension"
@@ -233,9 +230,8 @@
       tags:
         - packages
       ansible.builtin.package:
-        name: "{{ item }}"
-      with_items:
-        - "{{ zfs_packages }}"
+        name: "{{ zfs_packages }}"
+      when: zfs_packages | length > 0
     - name: "Linux - Configure SELinux"
       when: ansible_facts['os_family'] == "RedHat"
       block:
