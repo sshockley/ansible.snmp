@@ -115,7 +115,7 @@
         serole: object_r
         setype: etc_t
         selevel: s0
-    - name: "Linux : Install zfs script dependencies"
+    - name: "Linux : Install linux_config_files script dependencies"
       become: true
       tags:
         - packages
@@ -123,7 +123,6 @@
         name: "{{ item }}"
       with_items:
         - "{{ linux_config_files_packages }}"
-
 
 - name: "Linux : install systemd snmp extension"
   become: true
