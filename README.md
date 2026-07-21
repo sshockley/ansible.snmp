@@ -1,6 +1,6 @@
 # Ansible Role: SNMP
 
-[![Build Status](https://img.shields.io/travis/sbaerlocher/ansible.snmp.svg?branch=master&style=popout-square)](https://travis-ci.org/sbaerlocher/ansible.snmp) [![license](https://img.shields.io/github/license/mashape/apistatus.svg?style=popout-square)](https://sbaerlo.ch/licence) [![Ansible Galaxy](https://img.shields.io/badge/ansible--galaxy-snmp-blue.svg?style=popout-square)](https://galaxy.ansible.com/sbaerlocher/snmp) [![Ansible Role](https://img.shields.io/ansible/role/d/9234.svg?style=popout-square)](https://galaxy.ansible.com/sbaerlocher/snmp)
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg?style=popout-square)](https://sbaerlo.ch/licence) [![Ansible Galaxy](https://img.shields.io/badge/ansible--galaxy-snmp-blue.svg?style=popout-square)](https://galaxy.ansible.com/sbaerlocher/snmp)
 
 ## Description
 
@@ -13,6 +13,11 @@ ansible-galaxy install sbaerlocher.snmp
 ```
 
 ## Requirements
+
+- Ansible >= 2.15.
+- Collections listed in `requirements.yaml` (`ansible-galaxy collection install -r requirements.yaml`), including `community.general`, `ansible.windows`, `community.windows`, and `sbaerlocher.windows` (Windows 10/11 clients).
+- Controller Python packages in `requirements.txt` (`jmespath`, `netaddr`, `dnspython`).
+- On RedHat-family hosts the role installs `epel-release`; the extras repository (Rocky/Alma/CentOS) must be available. `snmp_password` and `snmp_encryption` must be overridden (min. 8 characters) — the role refuses to deploy the placeholder defaults.
 
 ## Role Variables
 
@@ -27,6 +32,13 @@ ansible-galaxy install sbaerlocher.snmp
 | snmp_agentaddress_address.ipvX   | {{ ansible_default_ipv4.address }} / {{ ansible_default_ipv6.address }} | Optional: SNMP bind address, X for ipv4 or ipv6 |
 | snmp_agentaddress_port.ipvX     | 161 / 161                                                               | Optional: SNMP port, X for ipv4 or ipv6         |
 | snmp_agentx_enabled             | false                                                                   | Optional: enable AgentX                         |
+| snmp_additional_packages        | []                                                                      | Extra packages to install with snmpd          |
+| snmp_extension_list             | []                                                                      | Extra extension scripts (url + extendline)     |
+| snmp_librenms_repo              | pinned commit of sshockley/librenms-agent                               | Source for LibreNMS agent scripts          |
+| snmp_exclude_smart              | false                                                                   | Skip smartmontools / smart-v1 installation      |
+| linux_config_files_packages     | [] (per-distro in vars/)                                                | Dependencies for linux_config_files extension   |
+| zfs_packages                    | [] (per-distro in vars/)                                                | Dependencies for zfs extension          |
+| smartmontools_packages          | [] (per-distro in vars/)                                                | Packages for S.M.A.R.T. monitoring          |
 
 ## Dependencies
 
