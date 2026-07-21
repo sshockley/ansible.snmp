@@ -1,6 +1,25 @@
 ---
 # tasks file for sbaerlocher.snmp
 
+- name: 'Verify SNMPv3 credentials are set'
+  ansible.builtin.assert:
+    that:
+      - snmp_password != 'snmp_password'
+      - snmp_encryption != 'snmp_encryption'
+      - snmp_password | length >= 8
+      - snmp_encryption | length >= 8
+    fail_msg: >-
+      Set snmp_password and snmp_encryption (minimum 8 characters,
+      not the placeholder defaults) before running this role.
+  when: ansible_system == "Linux"
+  tags:
+    - configuration
+    - packages
+
+# NOTE: the "{{ ansible_distribution[:19] }}.yml" entry below truncates
+# e.g. "Microsoft Windows 10 Pro" / "Microsoft Windows 11 Enterprise" to
+# "Microsoft Windows 1" so Windows client editions match the
+# "Microsoft Windows 1.yml" vars/tasks files. Do not rename those files.
 - name: 'Add OS specific variables'
   ansible.builtin.include_vars: "{{ loop_vars }}"
   with_first_found:
