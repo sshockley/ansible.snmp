@@ -408,7 +408,7 @@
   check_mode: true
 
 - name: "Linux : Configure snmp"
-  when: check_snmp.changed
+  when: check_snmp is changed
   tags:
     - configuration
   block:
@@ -432,7 +432,6 @@
         selevel: s0
       notify:
         - Restart snmp
-        - Enabled snmp
     - name: "Linux : install snmpd extensions config"
       ansible.builtin.template:
         src: "snmp/snmpd.conf.d/extensions.conf.j2"
@@ -444,9 +443,18 @@
         serole: object_r
         setype: etc_t
         selevel: s0
-
+  always:
+    # Ensure snmpd is running even if a task above failed
     - name: "Linux : Started snmp"
       become: true
       ansible.builtin.service:
         name: "{{ snmp_service_name }}"
         state: started
+
+- name: "Linux : Enable snmp service"
+  become: true
+  tags:
+    - configuration
+  ansible.builtin.service:
+    name: "{{ snmp_service_name }}"
+    enabled: true
