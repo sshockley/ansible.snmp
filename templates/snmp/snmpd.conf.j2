@@ -22,4 +22,4 @@ sysContact {{ snmp_contact }}
 master agentx
 {% endif %}
 
-includeDir /etc/snmp/snmpd.conf.d
+includeDir {{ snmp_confdir }}/snmpd.conf.d
