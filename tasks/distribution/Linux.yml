@@ -363,7 +363,7 @@
         target: '/var/cache/smart'
         setype: snmpd_var_lib_t
         state: present
-    - name: "Linux - Generate smart-v1 config file"
+    - name: "Linux - Generate smart-v1 config file" # noqa: command-instead-of-shell no-changed-when
       ansible.builtin.shell: '{{ snmp_extension_scripts + "/smart-v1 -g -C > " + snmp_extension_scripts + "/smart-v1.config" }}'
       args:
         creates: '{{ snmp_extension_scripts + "/smart-v1.config" }}'
