@@ -7,18 +7,6 @@
     name: "{{ snmp_service_name }}"
     state: restarted
 
-- name: Enabled snmp
-  become: true
-  ansible.builtin.service:
-    name: "{{ snmp_service_name }}"
-    enabled: true
-
-- name: Start snmp
-  become: true
-  ansible.builtin.service:
-    name: "{{ snmp_service_name }}"
-    state: started
-
 - name: Restart win snmp
   ansible.windows.win_service:
     name: SNMP
