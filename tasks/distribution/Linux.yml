@@ -308,19 +308,21 @@
   become: true
   tags:
     - packages
-  when: not ansible_facts['virtualization_role'] == "guest" and
-    not snmp_exclude_smart
+  when:
+    - ansible_facts['virtualization_role'] != "guest"
+    - not snmp_exclude_smart
+    - smartmontools_packages | length > 0
   ansible.builtin.package:
-    name: "{{ item }}"
-  with_items:
-    - "{{ smartmontools_packages }}"
+    name: "{{ smartmontools_packages }}"
 
 - name: "Linux : install smart-v1 snmp extension "
   become: true
   tags:
     - configuration
-  when: not ansible_facts['virtualization_role'] == "guest" and
-    not snmp_exclude_smart
+  when: 
+    - ansible_facts['virtualization_role'] != "guest"
+    - not snmp_exclude_smart
+    - smartmontools_packages | length > 0
   block:
     - name: "Download smart-v1"
       ansible.builtin.get_url:
@@ -361,8 +363,10 @@
         target: '/var/cache/smart'
         setype: snmpd_var_lib_t
         state: present
-    - name: "Linux - Generate smart-v1 config file" # noqa: command-instead-of-shell no-changed-when
+    - name: "Linux - Generate smart-v1 config file"
       ansible.builtin.shell: '{{ snmp_extension_scripts + "/smart-v1 -g -C > " + snmp_extension_scripts + "/smart-v1.config" }}'
+      args:
+        creates: '{{ snmp_extension_scripts + "/smart-v1.config" }}'
     - name: "Linux : Fix snmp_persistent_directory"
       when: ansible_facts['os_family'] == "RedHat"
       become: true
