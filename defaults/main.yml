@@ -2,6 +2,9 @@
 # defaults file for sbaerlocher.snmp
 
 snmp_additional_packages: []
+linux_config_files_packages: []
+smartmontools_packages: []
+zfs_packages: []
 snmp_encryption: snmp_encryption
 snmp_extension_scripts: '/usr/local/lib/snmpd'
 snmp_logging_options: ''
