@@ -14,7 +14,7 @@
     name: '{{ item.name }}'
     type: '{{ item.type }}'
     data: '{{ item.data }}'
-  with_items:
+  loop:
     - path: PermittedManagers
       name: '1'
       type: string
