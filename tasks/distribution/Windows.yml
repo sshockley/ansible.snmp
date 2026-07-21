@@ -8,9 +8,7 @@
 
 - name: Set fact DSC install state
   ansible.builtin.set_fact:
-    dsc_install_status: "{{ dsc_feature_info | json_query(dsc_state_query) | bool }}"
-  vars:
-    dsc_state_query: "[*].installed"
+    dsc_install_status: "{{ dsc_feature_info.features | default([]) | map(attribute='installed') | select | list | length > 0 }}"
 
 - name: 'Windows : install SNMP with DSC'
   ansible.windows.win_dsc:
@@ -23,7 +21,7 @@
   ansible.windows.win_feature:
     name: "{{ snmp_name }}"
     state: "{{ snmp_present }}"
-  when: ansible_powershell_version <= 5 and not dsc_install_status
+  when: not (ansible_powershell_version >= 5 and dsc_install_status)
 
 - name: 'Windows : setting SNMP'
   ansible.windows.win_regedit:
@@ -31,7 +29,7 @@
     name: '{{ item.name }}'
     type: '{{ item.type }}'
     data: '{{ item.data }}'
-  with_items:
+  loop:
     - path: PermittedManagers
       name: '1'
       type: string
