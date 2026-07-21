@@ -246,12 +246,24 @@
             serole: object_r
             setype: etc_t
             selevel: s0
-        - name: "Linux - Configure SELinux checkmodule" # noqa: command-instead-of-shell no-changed-when
-          ansible.builtin.shell: '/usr/bin/env checkmodule -M -m -o {{ snmp_confdir }}/snmp_nfs_zfs.mod {{ snmp_confdir }}/snmp_nfs_zfs.te'
-        - name: "Linux - Configure SELinux package" # noqa: command-instead-of-shell no-changed-when
-          ansible.builtin.shell: '/usr/bin/env semodule_package -m {{ snmp_confdir }}/snmp_nfs_zfs.mod -o {{ snmp_confdir }}/snmp_nfs_zfs.pp'
-        - name: "Linux - Configure SELinux package install" # noqa: command-instead-of-shell no-changed-when
-          ansible.builtin.shell: '/usr/bin/env semodule -i {{ snmp_confdir }}/snmp_nfs_zfs.pp'
+        - name: "Linux - Configure SELinux checkmodule"
+          ansible.builtin.command: 'checkmodule -M -m -o {{ snmp_confdir }}/snmp_nfs_zfs.mod {{ snmp_confdir }}/snmp_nfs_zfs.te'
+          args:
+            creates: '{{ snmp_confdir }}/snmp_nfs_zfs.mod'
+        - name: "Linux - Configure SELinux package"
+          ansible.builtin.command: 'semodule_package -m {{ snmp_confdir }}/snmp_nfs_zfs.mod -o {{ snmp_confdir }}/snmp_nfs_zfs.pp'
+          args:
+            creates: '{{ snmp_confdir }}/snmp_nfs_zfs.pp'
+          register: snmp_selinux_pp
+        - name: "Linux - Configure SELinux package install"
+          ansible.builtin.command: 'semodule -i {{ snmp_confdir }}/snmp_nfs_zfs.pp'
+          when: snmp_selinux_pp is changed
+#        - name: "Linux - Configure SELinux checkmodule" # noqa: command-instead-of-shell no-changed-when
+#          ansible.builtin.shell: '/usr/bin/env checkmodule -M -m -o {{ snmp_confdir }}/snmp_nfs_zfs.mod {{ snmp_confdir }}/snmp_nfs_zfs.te'
+#        - name: "Linux - Configure SELinux package" # noqa: command-instead-of-shell no-changed-when
+#          ansible.builtin.shell: '/usr/bin/env semodule_package -m {{ snmp_confdir }}/snmp_nfs_zfs.mod -o {{ snmp_confdir }}/snmp_nfs_zfs.pp'
+#        - name: "Linux - Configure SELinux package install" # noqa: command-instead-of-shell no-changed-when
+#          ansible.builtin.shell: '/usr/bin/env semodule -i {{ snmp_confdir }}/snmp_nfs_zfs.pp'
 
 - name: "Linux : install osupdates unprivileged snmp extension "
   become: true
