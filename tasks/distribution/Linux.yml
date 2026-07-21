@@ -319,7 +319,7 @@
   become: true
   tags:
     - configuration
-  when: 
+  when:
     - ansible_facts['virtualization_role'] != "guest"
     - not snmp_exclude_smart
     - smartmontools_packages | length > 0
