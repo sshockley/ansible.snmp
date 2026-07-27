@@ -94,6 +94,7 @@
       become: true
       tags:
         - packages
+      when: ansible_facts['Fedora']
       ansible.builtin.package:
         name: epel-release
     - name: "Linux : Install linux_config_files script dependencies"
