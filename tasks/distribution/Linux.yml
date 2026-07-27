@@ -53,7 +53,7 @@
     setype: lib_t
     selevel: s0
   loop:
-    - "{{ snmp_extension_list }}"
+    - "{{ snmp_extension_list | flatten(levels=1) }}"
 
 - name: "Linux : Install proxmox snmp extension"
   become: true
