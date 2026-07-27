@@ -52,8 +52,8 @@
     serole: object_r
     setype: lib_t
     selevel: s0
-  loop:
-    - "{{ snmp_extension_list | flatten(levels=1) }}"
+  with_items:
+    - "{{ snmp_extension_list }}"
 
 - name: "Linux : Install proxmox snmp extension"
   become: true
