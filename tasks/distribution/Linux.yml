@@ -377,6 +377,41 @@
         regexp: "my $cache    = '/var/cache/smart';"
         replace: '{{ "my $cache    = ''" + snmp_persistent_directory + "/smart'';" }}'
 
+# Remove SMART config if not required; don't uninstall smartmontools
+- name: "Linux : remove smart-v1 snmp extension"
+  become: true
+  tags:
+    - configuration
+  when: not snmp_include_smart
+  block:
+    - name: "Linux : remove smart-v1 snmpd config"
+      ansible.builtin.file:
+        path: "{{ snmp_confdir }}/snmpd.conf.d/smart-v1.conf"
+        state: absent
+      notify:
+        - Restart snmp
+    - name: "Linux : remove smart-v1 crontab, script and cache"
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop: "{{ snmp_smart_files + (snmp_smart_redhat_files if ansible_facts['os_family'] == 'RedHat' else []) }}"
+      vars:
+        snmp_smart_files:
+          - "/etc/cron.d/99smart-v1"
+          - '{{ snmp_extension_scripts + "/smart-v1" }}'
+          - '{{ snmp_extension_scripts + "/smart-v1.config" }}'
+          - "/var/cache/smart"
+        snmp_smart_redhat_files:
+          - '{{ snmp_persistent_directory + "/smart" }}'
+    - name: "Linux : remove selinux context for smart-v1 cache file"
+      when:
+        - ansible_facts['os_family'] == "RedHat"
+        - ansible_facts['selinux']['status'] | default('disabled') == "enabled"
+      community.general.sefcontext:
+        target: '/var/cache/smart'
+        setype: snmpd_var_lib_t
+        state: absent
+
 - name: "Linux : configure snmpd daemon"
   become: true
   ansible.builtin.template:
