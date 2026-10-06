@@ -1,5 +1,5 @@
 ---
-# tasks file for sbaerlocher.snmp
+# tasks file for sshockley.snmp
 
 - name: 'Verify SNMPv3 credentials are set'
   ansible.builtin.assert:
@@ -51,7 +51,9 @@
     - packages
   block:
     - name: 'Add OS specific variables'
-      ansible.builtin.include_vars: "{{ lookup('ansible.builtin.first_found', files=snmp_os_files, paths=['vars']) }}"
+      ansible.builtin.include_vars:
+        file: "{{ lookup('ansible.builtin.first_found', files=snmp_os_files, paths=['vars']) }}"
 
     - name: 'Include distribution tasks'
-      ansible.builtin.include_tasks: "{{ lookup('ansible.builtin.first_found', files=snmp_os_files, paths=['distribution']) }}"
+      ansible.builtin.include_tasks:
+        file: "{{ lookup('ansible.builtin.first_found', files=snmp_os_files, paths=['distribution']) }}"
