@@ -311,7 +311,7 @@
     - packages
   when:
     - ansible_facts['virtualization_role'] != "guest"
-    - not snmp_exclude_smart
+    - snmp_include_smart
     - smartmontools_packages | length > 0
   ansible.builtin.package:
     name: "{{ smartmontools_packages }}"
@@ -322,7 +322,7 @@
     - configuration
   when:
     - ansible_facts['virtualization_role'] != "guest"
-    - not snmp_exclude_smart
+    - snmp_include_smart
     - smartmontools_packages | length > 0
   block:
     - name: "Download smart-v1"
