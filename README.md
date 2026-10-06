@@ -35,7 +35,7 @@ ansible-galaxy install sbaerlocher.snmp
 | snmp_additional_packages        | []                                                                      | Extra packages to install with snmpd          |
 | snmp_extension_list             | []                                                                      | Extra extension scripts (url + extendline)     |
 | snmp_librenms_repo              | pinned commit of sshockley/librenms-agent                               | Source for LibreNMS agent scripts          |
-| snmp_exclude_smart              | false                                                                   | Skip smartmontools / smart-v1 installation      |
+| snmp_include_smart              | false                                                                   | Install smartmontools / smart-v1      |
 | linux_config_files_packages     | [] (per-distro in vars/)                                                | Dependencies for linux_config_files extension   |
 | zfs_packages                    | [] (per-distro in vars/)                                                | Dependencies for zfs extension          |
 | smartmontools_packages          | [] (per-distro in vars/)                                                | Packages for S.M.A.R.T. monitoring          |
