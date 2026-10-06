@@ -3,4 +3,4 @@
 SHELL=/bin/bash
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 MAILTO=root
-*/5 * * * * root {{ snmp_extension_scripts }}/systemd.py > {{ snmp_persistent_directory }}/systemd
+*/5 * * * * root {{ snmp_extension_scripts }}/systemd.py > {{ snmp_persistent_directory }}/systemd.tmp && mv {{ snmp_persistent_directory }}/systemd.tmp {{ snmp_persistent_directory }}/systemd

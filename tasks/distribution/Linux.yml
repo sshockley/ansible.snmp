@@ -408,7 +408,10 @@
         setype: snmpd_var_lib_t
         state: present
     - name: "Linux - Generate smart-v1 config file" # noqa: command-instead-of-shell no-changed-when
-      ansible.builtin.shell: '{{ snmp_extension_scripts + "/smart-v1 -g -C > " + snmp_extension_scripts + "/smart-v1.config" }}'
+      ansible.builtin.shell: >-
+        {{ snmp_extension_scripts }}/smart-v1 -g -C > {{ snmp_extension_scripts }}/smart-v1.config.tmp
+        && mv {{ snmp_extension_scripts }}/smart-v1.config.tmp {{ snmp_extension_scripts }}/smart-v1.config
+        || { rm -f {{ snmp_extension_scripts }}/smart-v1.config.tmp; exit 1; }
       args:
         creates: '{{ snmp_extension_scripts + "/smart-v1.config" }}'
     - name: "Linux : Fix snmp_persistent_directory"
@@ -442,6 +445,7 @@
           - '{{ snmp_extension_scripts + "/smart-v1" }}'
           - '{{ snmp_extension_scripts + "/smart-v1.config" }}'
           - "/var/cache/smart"
+          - "/var/cache/smart.snmp"
         snmp_smart_redhat_files:
           - '{{ snmp_persistent_directory + "/smart" }}'
           - '{{ snmp_persistent_directory + "/smart.snmp" }}'
@@ -453,6 +457,39 @@
         target: '/var/cache/smart'
         setype: snmpd_var_lib_t
         state: absent
+
+# Remove leftovers from conditional extensions that no longer apply to this host
+- name: "Linux : remove inactive snmp extensions"
+  become: true
+  tags:
+    - configuration
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  when: not (item.active | bool)
+  loop:
+    - path: "{{ snmp_confdir }}/snmpd.conf.d/proxmox.conf"
+      active: "{{ 'pve' in ansible_kernel }}"
+    - path: "{{ snmp_extension_scripts }}/proxmox"
+      active: "{{ 'pve' in ansible_kernel }}"
+    - path: /etc/sudoers.d/snmpd-proxmox
+      active: "{{ 'pve' in ansible_kernel }}"
+    - path: "{{ snmp_confdir }}/snmpd.conf.d/zfs.conf"
+      active: "{{ 'zfs' in ansible_facts.packages or 'zfs-zed' in ansible_facts.packages }}"
+    - path: "{{ snmp_extension_scripts }}/zfs"
+      active: "{{ 'zfs' in ansible_facts.packages or 'zfs-zed' in ansible_facts.packages }}"
+    - path: "{{ snmp_confdir }}/snmpd.conf.d/systemd.conf"
+      active: "{{ ansible_facts.service_mgr == 'systemd' }}"
+    - path: /etc/cron.d/99systemd-generate
+      active: "{{ ansible_facts.service_mgr == 'systemd' }}"
+    - path: "{{ snmp_extension_scripts }}/systemd.py"
+      active: "{{ ansible_facts.service_mgr == 'systemd' }}"
+    - path: "{{ snmp_persistent_directory }}/systemd"
+      active: "{{ ansible_facts.service_mgr == 'systemd' }}"
+  loop_control:
+    label: "{{ item.path }}"
+  notify:
+    - Restart snmp
 
 - name: "Linux : configure snmpd daemon"
   become: true
