@@ -102,7 +102,7 @@
       tags:
         - packages
       ansible.builtin.package:
-        name: "{{ linux_config_files_packages }}"
+        name: "{{ snmp_linux_config_files_packages }}"
     - name: "Download linux_config_files snmp extension"
       ansible.builtin.get_url:
         url: '{{ snmp_librenms_repo + "/snmp/linux_config_files.py" }}'
@@ -231,8 +231,8 @@
       tags:
         - packages
       ansible.builtin.package:
-        name: "{{ zfs_packages }}"
-      when: zfs_packages | length > 0
+        name: "{{ snmp_zfs_packages }}"
+      when: snmp_zfs_packages | length > 0
     - name: "Linux - Configure SELinux"
       when: ansible_facts['os_family'] == "RedHat"
       block:
@@ -259,6 +259,7 @@
         - name: "Linux - Configure SELinux package install"
           ansible.builtin.command: 'semodule -i {{ snmp_confdir }}/snmp_nfs_zfs.pp'
           when: snmp_selinux_pp is changed
+          changed_when: true
 #        - name: "Linux - Configure SELinux checkmodule" # noqa: command-instead-of-shell no-changed-when
 #          ansible.builtin.shell: '/usr/bin/env checkmodule -M -m -o {{ snmp_confdir }}/snmp_nfs_zfs.mod {{ snmp_confdir }}/snmp_nfs_zfs.te'
 #        - name: "Linux - Configure SELinux package" # noqa: command-instead-of-shell no-changed-when
@@ -312,9 +313,9 @@
   when:
     - ansible_facts['virtualization_role'] != "guest"
     - snmp_include_smart
-    - smartmontools_packages | length > 0
+    - snmp_smartmontools_packages | length > 0
   ansible.builtin.package:
-    name: "{{ smartmontools_packages }}"
+    name: "{{ snmp_smartmontools_packages }}"
 
 - name: "Linux : install smart-v1 snmp extension "
   become: true
@@ -323,7 +324,7 @@
   when:
     - ansible_facts['virtualization_role'] != "guest"
     - snmp_include_smart
-    - smartmontools_packages | length > 0
+    - snmp_smartmontools_packages | length > 0
   block:
     - name: "Download smart-v1"
       ansible.builtin.get_url:
@@ -405,11 +406,11 @@
     serole: object_r
     setype: etc_t
     selevel: s0
-  register: check_snmp
+  register: snmp_config_check
   check_mode: true
 
 - name: "Linux : Configure snmp"
-  when: check_snmp is changed
+  when: snmp_config_check is changed
   tags:
     - configuration
   block:

@@ -5,16 +5,16 @@ snmp_packages:
   - net-snmp
 #  - net-snmp-utils
 
-zfs_packages:
+snmp_zfs_packages:
   - perl-JSON
   - perl-File-Slurp
   - perl-MIME-Base64
 
-linux_config_files_packages:
+snmp_linux_config_files_packages:
   - python-unversioned-command
   - rpmconf
 
-smartmontools_packages:
+snmp_smartmontools_packages:
   - smartmontools
   - perl-JSON
   - perl-IO-Compress
