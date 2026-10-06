@@ -5,8 +5,21 @@
   become_method: ansible.builtin.runas
   become_user: System
   become: true
-  sbaerlocher.windows.win_capability:
-    name: 'SNMP.Client~~~~0.0.1.0'
+  ansible.windows.win_powershell:
+    parameters:
+      Name: 'SNMP.Client~~~~0.0.1.0'
+    script: |
+      [CmdletBinding(SupportsShouldProcess)]
+      param ([String]$Name)
+
+      $Ansible.Changed = $false
+      $capability = Get-WindowsCapability -Online -Name $Name
+      if ($capability.State -ne 'Installed') {
+          if ($PSCmdlet.ShouldProcess($Name, 'Add-WindowsCapability')) {
+              Add-WindowsCapability -Online -Name $Name | Out-Null
+          }
+          $Ansible.Changed = $true
+      }
 
 - name: 'Windows : setting SNMP'
   ansible.windows.win_regedit:

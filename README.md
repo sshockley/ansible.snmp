@@ -15,7 +15,7 @@ ansible-galaxy install sbaerlocher.snmp
 ## Requirements
 
 - Ansible >= 2.15.
-- Collections listed in `requirements.yaml` (`ansible-galaxy collection install -r requirements.yaml`), including `community.general`, `ansible.windows`, `community.windows`, and `sbaerlocher.windows` (Windows 10/11 clients).
+- Collections listed in `requirements.yaml` (`ansible-galaxy collection install -r requirements.yaml`), including `community.general`, `ansible.windows` (>= 1.5.0), and `community.windows`.
 - Controller Python packages in `requirements.txt` (`jmespath`, `netaddr`, `dnspython`).
 - On RedHat-family hosts the role installs `epel-release`; the extras repository (Rocky/Alma/CentOS) must be available. `snmp_password` and `snmp_encryption` must be overridden (min. 8 characters) — the role refuses to deploy the placeholder defaults.
 
