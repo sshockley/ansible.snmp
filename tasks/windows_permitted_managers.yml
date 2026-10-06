@@ -1,0 +1,43 @@
+---
+# Manage HKLM:\...\SNMP\Parameters\PermittedManagers as numbered values 1..n.
+# An empty snmp_permitted_managers removes all entries, so any host may query.
+
+- name: 'Windows : normalise permitted SNMP managers'
+  ansible.builtin.set_fact:
+    snmp_permitted_managers_key: 'HKLM:\SYSTEM\CurrentControlSet\Services\SNMP\Parameters\PermittedManagers'
+    # Accept a single string as well as a list; drop empty entries
+    snmp_permitted_managers_list: >-
+      {{ ([snmp_permitted_managers] if snmp_permitted_managers is string else snmp_permitted_managers)
+         | select | list }}
+
+- name: 'Windows : derive permitted SNMP manager value names'
+  ansible.builtin.set_fact:
+    snmp_permitted_managers_names: "{{ range(1, snmp_permitted_managers_list | length + 1) | map('string') | list }}"
+
+- name: 'Windows : read permitted SNMP managers'
+  ansible.windows.win_reg_stat:
+    path: '{{ snmp_permitted_managers_key }}'
+  register: snmp_permitted_managers_reg
+
+- name: 'Windows : set permitted SNMP managers'
+  ansible.windows.win_regedit:
+    path: '{{ snmp_permitted_managers_key }}'
+    name: '{{ index + 1 }}'
+    type: string
+    data: '{{ item }}'
+  loop: '{{ snmp_permitted_managers_list }}'
+  loop_control:
+    index_var: index
+  notify:
+    - Restart win snmp
+
+- name: 'Windows : remove stale permitted SNMP managers'
+  ansible.windows.win_regedit:
+    path: '{{ snmp_permitted_managers_key }}'
+    name: '{{ item }}'
+    state: absent
+  loop: >-
+    {{ snmp_permitted_managers_reg.properties | default({}) | list
+       | reject('in', ['', '(default)'] + snmp_permitted_managers_names) | list }}
+  notify:
+    - Restart win snmp

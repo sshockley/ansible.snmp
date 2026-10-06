@@ -28,10 +28,6 @@
     type: '{{ item.type }}'
     data: '{{ item.data }}'
   loop:
-    - path: PermittedManagers
-      name: '1'
-      type: string
-      data: '{{ snmp_access_address | default() }}'
     - path: RFC1156Agent
       name: sysContact
       type: string
@@ -47,10 +43,9 @@
   notify:
     - Restart win snmp
 
-# - name: 'Windows : set remote IP-Address'
-#   ansible.builtin.set_fact:
-#     snmp_remoteip: "{{ lookup('dig', snmp_monitoring_server) }}"
-#   when: not snmp_monitoring_server | ipaddr
+- name: 'Windows : configure permitted SNMP managers'
+  ansible.builtin.include_tasks:
+    file: "{{ role_path }}/tasks/windows_permitted_managers.yml"
 
 # - name: 'Windows : firewall rule to allow ICMP'
 #   community.windows.win_firewall_rule:
@@ -58,7 +53,7 @@
 #     action: allow
 #     direction: in
 #     protocol: ICMPv4
-#     remoteip: '{{ snmp_remoteip | default(snmp_monitoring_server) }}'
+#     remoteip: '{{ snmp_permitted_managers | join(',') }}'
 #     state: present
 #     enabled: true
 
@@ -69,6 +64,6 @@
 #     direction: in
 #     protocol: UDP
 #     localport: '161'
-#     remoteip: '{{ snmp_remoteip | default(snmp_monitoring_server) }}'
+#     remoteip: '{{ snmp_permitted_managers | join(',') }}'
 #     state: present
 #     enabled: true

@@ -1,9 +1,10 @@
 ---
 
 galaxy_info:
-  author: 'Simon Bärlocher'
-  company: 'sbaerlo.ch/er'
-  description: 'Installing and Configuration SNMP v3 on Linux and SNMP v2 on Windows.'
+  namespace: sshockley
+  role_name: snmp
+  author: 'Steve Shockley (based on sbaerlocher.snmp by Simon Bärlocher)'
+  description: 'Install and configure SNMPv3 with LibreNMS extensions on Linux, and SNMP v2c on Windows.'
   license: MIT
   min_ansible_version: '2.15'
   platforms:
@@ -26,5 +27,7 @@ galaxy_info:
     - system
     - networking
     - monitoring
+    - snmp
+    - librenms
 
 dependencies: []
