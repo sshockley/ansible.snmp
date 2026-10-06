@@ -1,27 +1,10 @@
 ---
 # tasks file for sbaerlocher.snmp
 
-- name: Check DSC Feature state
-  ansible.windows.win_feature_info:
-    name: "{{ snmp_dsc_name }}"
-  register: snmp_dsc_feature_info
-
-- name: Set fact DSC install state
-  ansible.builtin.set_fact:
-    snmp_dsc_install_status: "{{ snmp_dsc_feature_info.features | default([]) | map(attribute='installed') | select | list | length > 0 }}"
-
-- name: 'Windows : install SNMP with DSC'
-  ansible.windows.win_dsc:
-    resource_name: "{{ snmp_resource_name }}"
-    Name: "{{ snmp_name }}"
-    Ensure: "{{ snmp_present }}"
-  when: ansible_powershell_version >= 5 and snmp_dsc_install_status
-
-- name: 'Windows : install SNMP without DSC'
+- name: 'Windows : install SNMP'
   ansible.windows.win_feature:
     name: "{{ snmp_name }}"
-    state: "{{ snmp_present }}"
-  when: not (ansible_powershell_version >= 5 and snmp_dsc_install_status)
+    state: present
 
 - name: 'Windows : setting SNMP'
   ansible.windows.win_regedit:
