@@ -1,0 +1,45 @@
+---
+# LibreNMS agent extensions managed on Linux hosts.
+#   name:    also selects the snmpd fragment templates/snmp/snmpd.conf.d/<name>.conf.j2
+#   url:     path below snmp_librenms_repo; the script keeps its file name
+#   cron:    optional template in templates/cron.d/, installed to /etc/cron.d/
+#   cleanup: extra files to remove when the extension no longer applies
+#   active:  whether the extension applies to this host
+snmp_librenms_extensions:
+  - name: distro
+    url: snmp/distro
+    active: true
+  - name: osupdates
+    url: snmp/unpriv/osupdates/osupdates-unpriv-generate.sh
+    cron: 99osupdates-generate
+    active: true
+  - name: systemd
+    url: snmp/unpriv/systemd/systemd.py
+    cron: 99systemd-generate
+    cleanup:
+      - "{{ snmp_persistent_directory }}/systemd"
+    active: "{{ ansible_facts['service_mgr'] == 'systemd' }}"
+  - name: linux_config_files
+    url: snmp/linux_config_files.py
+    active: "{{ ansible_facts['os_family'] == 'RedHat' }}"
+  - name: zfs
+    url: snmp/zfs
+    active: "{{ 'zfs' in ansible_facts['packages'] or 'zfs-zed' in ansible_facts['packages'] }}"
+  - name: proxmox
+    url: agent-local/proxmox
+    cleanup:
+      - /etc/sudoers.d/snmpd-proxmox
+    active: "{{ 'pve' in ansible_facts['kernel'] }}"
+  - name: smart-v1
+    url: snmp/smart-v1
+    cron: 99smart-v1
+    cleanup:
+      - "{{ snmp_extension_scripts }}/smart-v1.config"
+      - /var/cache/smart
+      - /var/cache/smart.snmp
+      - "{{ snmp_persistent_directory }}/smart"
+      - "{{ snmp_persistent_directory }}/smart.snmp"
+    active: >-
+      {{ snmp_include_smart | bool
+         and ansible_facts['virtualization_role'] != 'guest'
+         and snmp_smartmontools_packages | length > 0 }}

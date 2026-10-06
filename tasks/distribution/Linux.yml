@@ -8,6 +8,20 @@
   ansible.builtin.package:
     name: "{{ snmp_packages + snmp_additional_packages }}"
 
+- name: Gather the package facts
+  tags:
+    - always
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: "Linux : Determine which LibreNMS extensions apply"
+  tags:
+    - always
+  ansible.builtin.set_fact:
+    snmp_extension_enabled: >-
+      {{ dict(snmp_librenms_extensions | map(attribute='name')
+              | zip(snmp_librenms_extensions | map(attribute='active') | map('bool'))) }}
+
 - name: "Linux : Create snmpd include directory"
   become: true
   tags:
@@ -56,31 +70,20 @@
   loop_control:
     label: "{{ item.url }}"
 
-- name: "Linux : Install proxmox snmp extension"
+- name: "Linux : proxmox extension prerequisites"
   become: true
   tags:
     - configuration
-  when: '"pve" in ansible_kernel'
+  when:
+    - snmp_extension_enabled['proxmox']
+    - snmp_daemon_user is defined
   block:
-    - name: "Linux : Download Proxmox extension"
-      ansible.builtin.get_url:
-        url: '{{ snmp_librenms_repo + "/agent-local/proxmox" }}'
-        dest: '{{ snmp_extension_scripts + "/" }}'
-        owner: root
-        group: root
-        mode: "0755"
-        seuser: system_u
-        serole: object_r
-        setype: lib_t
-        selevel: s0
     - name: "Linux : Install sudo for proxmox extension"
       tags:
         - packages
-      when: snmp_daemon_user is defined
       ansible.builtin.package:
         name: sudo
     - name: "Linux : Allow snmpd to run proxmox extension as root"
-      when: snmp_daemon_user is defined
       ansible.builtin.copy:
         content: |
           # {{ ansible_managed }}
@@ -90,174 +93,28 @@
         group: root
         mode: "0440"
         validate: "visudo -cf %s"
-    - name: "Linux : install proxmox snmpd config"
-      ansible.builtin.template:
-        src: "snmp/snmpd.conf.d/proxmox.conf.j2"
-        dest: "{{ snmp_confdir }}/snmpd.conf.d/proxmox.conf"
-        owner: root
-        group: root
-        mode: "0600"
-        seuser: system_u
-        serole: object_r
-        setype: etc_t
-        selevel: s0
-      notify:
-        - Restart snmp
 
-- name: "Linux : install linux_config_files snmp extension"
+- name: "Linux : linux_config_files extension prerequisites"
   become: true
   tags:
-    - configuration
-  when: ansible_facts['os_family'] == "RedHat"
+    - packages
+  when: snmp_extension_enabled['linux_config_files']
   block:
     - name: "Linux : Install EPEL repository"
-      become: true
-      tags:
-        - packages
       when: ansible_facts['distribution'] != 'Fedora'
       ansible.builtin.package:
         name: epel-release
     - name: "Linux : Install linux_config_files script dependencies"
-      become: true
-      tags:
-        - packages
       ansible.builtin.package:
         name: "{{ snmp_linux_config_files_packages }}"
-    - name: "Download linux_config_files snmp extension"
-      ansible.builtin.get_url:
-        url: '{{ snmp_librenms_repo + "/snmp/linux_config_files.py" }}'
-        dest: '{{ snmp_extension_scripts + "/" }}'
-        owner: root
-        group: root
-        mode: "0755"
-        seuser: system_u
-        serole: object_r
-        setype: lib_t
-        selevel: s0
-    - name: "Linux : install linux_config_files snmpd config"
-      ansible.builtin.template:
-        src: "snmp/snmpd.conf.d/linux_config_files.conf.j2"
-        dest: "{{ snmp_confdir }}/snmpd.conf.d/linux_config_files.conf"
-        owner: root
-        group: root
-        mode: "0600"
-        seuser: system_u
-        serole: object_r
-        setype: etc_t
-        selevel: s0
-      notify:
-        - Restart snmp
 
-- name: "Linux : install systemd snmp extension"
+- name: "Linux : zfs extension prerequisites"
   become: true
   tags:
     - configuration
-  when: ansible_facts.service_mgr == "systemd"
+  when: snmp_extension_enabled['zfs']
   block:
-    - name: "Download systemd snmp extension"
-      ansible.builtin.get_url:
-        url: '{{ snmp_librenms_repo + "/snmp/unpriv/systemd/systemd.py" }}'
-        dest: '{{ snmp_extension_scripts + "/" }}'
-        owner: root
-        group: root
-        mode: "0755"
-        seuser: system_u
-        serole: object_r
-        setype: lib_t
-        selevel: s0
-    - name: "Linux : install systemd snmpd config"
-      ansible.builtin.template:
-        src: "snmp/snmpd.conf.d/systemd.conf.j2"
-        dest: "{{ snmp_confdir }}/snmpd.conf.d/systemd.conf"
-        owner: root
-        group: root
-        mode: "0600"
-        seuser: system_u
-        serole: object_r
-        setype: etc_t
-        selevel: s0
-      notify:
-        - Restart snmp
-    - name: "Linux : install systemd crontab"
-      ansible.builtin.template:
-        src: "cron.d/99systemd-generate.j2"
-        dest: "/etc/cron.d/99systemd-generate"
-        owner: root
-        group: root
-        mode: "0644"
-        seuser: system_u
-        serole: object_r
-        setype: system_cron_spool_t
-        selevel: s0
-
-- name: "Linux : install distro snmp extension"
-  become: true
-  tags:
-    - configuration
-  block:
-    - name: "Download distro snmp extension"
-      ansible.builtin.get_url:
-        url: '{{ snmp_librenms_repo + "/snmp/distro" }}'
-        dest: '{{ snmp_extension_scripts + "/" }}'
-        owner: root
-        group: root
-        mode: "0755"
-        seuser: system_u
-        serole: object_r
-        setype: lib_t
-        selevel: s0
-    - name: "Linux : install distro snmpd config"
-      ansible.builtin.template:
-        src: "snmp/snmpd.conf.d/distro.conf.j2"
-        dest: "{{ snmp_confdir }}/snmpd.conf.d/distro.conf"
-        owner: root
-        group: root
-        mode: "0600"
-        seuser: system_u
-        serole: object_r
-        setype: etc_t
-        selevel: s0
-      notify:
-        - Restart snmp
-
-- name: Gather the package facts
-  tags:
-    - always
-  ansible.builtin.package_facts:
-    manager: auto
-
-- name: "Linux : install zfs snmp extension"
-  become: true
-  tags:
-    - configuration
-  when: "'zfs' in ansible_facts.packages or 'zfs-zed' in ansible_facts.packages"
-  block:
-    - name: "Download zfs snmp extension"
-      ansible.builtin.get_url:
-        url: '{{ snmp_librenms_repo + "/snmp/zfs" }}'
-        dest: '{{ snmp_extension_scripts + "/" }}'
-        owner: root
-        group: root
-        mode: "0755"
-        seuser: system_u
-        serole: object_r
-        setype: lib_t
-        selevel: s0
-    - name: "Linux : install zfs snmpd config"
-      ansible.builtin.template:
-        src: "snmp/snmpd.conf.d/zfs.conf.j2"
-        dest: "{{ snmp_confdir }}/snmpd.conf.d/zfs.conf"
-        owner: root
-        group: root
-        mode: "0600"
-        seuser: system_u
-        serole: object_r
-        setype: etc_t
-        selevel: s0
-      notify:
-        - Restart snmp
     - name: "Linux : Install zfs script dependencies"
-      become: true
       tags:
         - packages
       ansible.builtin.package:
@@ -304,102 +161,82 @@
               ansible.builtin.command: 'semodule -i {{ snmp_confdir }}/snmp_nfs_zfs.pp'
               changed_when: true
 
-- name: "Linux : install osupdates unprivileged snmp extension "
-  become: true
-  tags:
-    - configuration
-  block:
-    - name: "Download osupdates-unpriv-generate.sh"
-      ansible.builtin.get_url:
-        url: '{{ snmp_librenms_repo + "/snmp/unpriv/osupdates/osupdates-unpriv-generate.sh" }}'
-        dest: '{{ snmp_extension_scripts + "/" }}'
-        owner: root
-        group: root
-        mode: "0755"
-        seuser: system_u
-        serole: object_r
-        setype: lib_t
-        selevel: s0
-    - name: "Linux : install osupdates crontab"
-      ansible.builtin.template:
-        src: "cron.d/99osupdates-generate.j2"
-        dest: "/etc/cron.d/99osupdates-generate"
-        owner: root
-        group: root
-        mode: "0644"
-        seuser: system_u
-        serole: object_r
-        setype: system_cron_spool_t
-        selevel: s0
-    - name: "Linux : install osupdates snmpd config"
-      ansible.builtin.template:
-        src: "snmp/snmpd.conf.d/osupdates.conf.j2"
-        dest: "{{ snmp_confdir }}/snmpd.conf.d/osupdates.conf"
-        owner: root
-        group: root
-        mode: "0600"
-        seuser: system_u
-        serole: object_r
-        setype: etc_t
-        selevel: s0
-      notify:
-        - Restart snmp
-
 - name: "Linux : Install smartmontools"
   become: true
   tags:
     - packages
-  when:
-    - ansible_facts['virtualization_role'] != "guest"
-    - snmp_include_smart
-    - snmp_smartmontools_packages | length > 0
+  when: snmp_extension_enabled['smart-v1']
   ansible.builtin.package:
     name: "{{ snmp_smartmontools_packages }}"
 
-- name: "Linux : install smart-v1 snmp extension "
+# Install the extensions that apply to this host
+- name: "Linux : Download LibreNMS extension scripts"
+  become: true
+  tags:
+    - configuration
+  when: snmp_extension_enabled[item.name]
+  ansible.builtin.get_url:
+    url: "{{ snmp_librenms_repo }}/{{ item.url }}"
+    dest: '{{ snmp_extension_scripts + "/" }}'
+    owner: root
+    group: root
+    mode: "0755"
+    seuser: system_u
+    serole: object_r
+    setype: lib_t
+    selevel: s0
+  loop: "{{ snmp_librenms_extensions }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: "Linux : Install LibreNMS extension snmpd configs"
+  become: true
+  tags:
+    - configuration
+  when: snmp_extension_enabled[item.name]
+  ansible.builtin.template:
+    src: "snmp/snmpd.conf.d/{{ item.name }}.conf.j2"
+    dest: "{{ snmp_confdir }}/snmpd.conf.d/{{ item.name }}.conf"
+    owner: root
+    group: root
+    mode: "0600"
+    seuser: system_u
+    serole: object_r
+    setype: etc_t
+    selevel: s0
+  loop: "{{ snmp_librenms_extensions }}"
+  loop_control:
+    label: "{{ item.name }}"
+  notify:
+    - Restart snmp
+
+- name: "Linux : Install LibreNMS extension cron jobs"
   become: true
   tags:
     - configuration
   when:
-    - ansible_facts['virtualization_role'] != "guest"
-    - snmp_include_smart
-    - snmp_smartmontools_packages | length > 0
+    - snmp_extension_enabled[item.name]
+    - item.cron is defined
+  ansible.builtin.template:
+    src: "cron.d/{{ item.cron }}.j2"
+    dest: "/etc/cron.d/{{ item.cron }}"
+    owner: root
+    group: root
+    mode: "0644"
+    seuser: system_u
+    serole: object_r
+    setype: system_cron_spool_t
+    selevel: s0
+  loop: "{{ snmp_librenms_extensions }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: "Linux : configure smart-v1 extension"
+  become: true
+  tags:
+    - configuration
+  when: snmp_extension_enabled['smart-v1']
   block:
-    - name: "Download smart-v1"
-      ansible.builtin.get_url:
-        url: '{{ snmp_librenms_repo + "/snmp/smart-v1" }}'
-        dest: '{{ snmp_extension_scripts + "/" }}'
-        owner: root
-        group: root
-        mode: "0755"
-        seuser: system_u
-        serole: object_r
-        setype: lib_t
-        selevel: s0
-    - name: "Linux : install smart-v1 crontab"
-      ansible.builtin.template:
-        src: "cron.d/99smart-v1.j2"
-        dest: "/etc/cron.d/99smart-v1"
-        owner: root
-        group: root
-        mode: "0644"
-        seuser: system_u
-        serole: object_r
-        setype: system_cron_spool_t
-        selevel: s0
-    - name: "Linux : install smart-v1 snmpd config"
-      ansible.builtin.template:
-        src: "snmp/snmpd.conf.d/smart-v1.conf.j2"
-        dest: "{{ snmp_confdir }}/snmpd.conf.d/smart-v1.conf"
-        owner: root
-        group: root
-        mode: "0600"
-        seuser: system_u
-        serole: object_r
-        setype: etc_t
-        selevel: s0
-      notify:
-        - Restart snmp
     - name: "Linux : configure selinux for smart-v1 cache file"
       when:
         - ansible_facts['os_family'] == "RedHat"
@@ -422,75 +259,71 @@
         regexp: '^#?cache='
         line: '{{ "cache=" + snmp_persistent_directory + "/smart" }}'
 
-# Remove SMART config if not required; don't uninstall smartmontools
-- name: "Linux : remove smart-v1 snmp extension"
+# Remove extensions that no longer apply to this host
+- name: "Linux : Remove inactive LibreNMS extension snmpd configs"
   become: true
   tags:
     - configuration
-  when: not snmp_include_smart
-  block:
-    - name: "Linux : remove smart-v1 snmpd config"
-      ansible.builtin.file:
-        path: "{{ snmp_confdir }}/snmpd.conf.d/smart-v1.conf"
-        state: absent
-      notify:
-        - Restart snmp
-    - name: "Linux : remove smart-v1 crontab, script and cache"
-      ansible.builtin.file:
-        path: "{{ item }}"
-        state: absent
-      loop: "{{ snmp_smart_files + (snmp_smart_redhat_files if ansible_facts['os_family'] == 'RedHat' else []) }}"
-      vars:
-        snmp_smart_files:
-          - "/etc/cron.d/99smart-v1"
-          - '{{ snmp_extension_scripts + "/smart-v1" }}'
-          - '{{ snmp_extension_scripts + "/smart-v1.config" }}'
-          - "/var/cache/smart"
-          - "/var/cache/smart.snmp"
-        snmp_smart_redhat_files:
-          - '{{ snmp_persistent_directory + "/smart" }}'
-          - '{{ snmp_persistent_directory + "/smart.snmp" }}'
-    - name: "Linux : remove selinux context for smart-v1 cache file"
-      when:
-        - ansible_facts['os_family'] == "RedHat"
-        - ansible_facts['selinux']['status'] | default('disabled') == "enabled"
-      community.general.sefcontext:
-        target: '/var/cache/smart'
-        setype: snmpd_var_lib_t
-        state: absent
-
-# Remove leftovers from conditional extensions that no longer apply to this host
-- name: "Linux : remove inactive snmp extensions"
-  become: true
-  tags:
-    - configuration
+  when: not snmp_extension_enabled[item.name]
   ansible.builtin.file:
-    path: "{{ item.path }}"
+    path: "{{ snmp_confdir }}/snmpd.conf.d/{{ item.name }}.conf"
     state: absent
-  when: not (item.active | bool)
-  loop:
-    - path: "{{ snmp_confdir }}/snmpd.conf.d/proxmox.conf"
-      active: "{{ 'pve' in ansible_kernel }}"
-    - path: "{{ snmp_extension_scripts }}/proxmox"
-      active: "{{ 'pve' in ansible_kernel }}"
-    - path: /etc/sudoers.d/snmpd-proxmox
-      active: "{{ 'pve' in ansible_kernel }}"
-    - path: "{{ snmp_confdir }}/snmpd.conf.d/zfs.conf"
-      active: "{{ 'zfs' in ansible_facts.packages or 'zfs-zed' in ansible_facts.packages }}"
-    - path: "{{ snmp_extension_scripts }}/zfs"
-      active: "{{ 'zfs' in ansible_facts.packages or 'zfs-zed' in ansible_facts.packages }}"
-    - path: "{{ snmp_confdir }}/snmpd.conf.d/systemd.conf"
-      active: "{{ ansible_facts.service_mgr == 'systemd' }}"
-    - path: /etc/cron.d/99systemd-generate
-      active: "{{ ansible_facts.service_mgr == 'systemd' }}"
-    - path: "{{ snmp_extension_scripts }}/systemd.py"
-      active: "{{ ansible_facts.service_mgr == 'systemd' }}"
-    - path: "{{ snmp_persistent_directory }}/systemd"
-      active: "{{ ansible_facts.service_mgr == 'systemd' }}"
+  loop: "{{ snmp_librenms_extensions }}"
   loop_control:
-    label: "{{ item.path }}"
+    label: "{{ item.name }}"
   notify:
     - Restart snmp
+
+- name: "Linux : Remove inactive LibreNMS extension scripts"
+  become: true
+  tags:
+    - configuration
+  when: not snmp_extension_enabled[item.name]
+  ansible.builtin.file:
+    path: "{{ snmp_extension_scripts }}/{{ item.url | basename }}"
+    state: absent
+  loop: "{{ snmp_librenms_extensions }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: "Linux : Remove inactive LibreNMS extension cron jobs"
+  become: true
+  tags:
+    - configuration
+  when:
+    - not snmp_extension_enabled[item.name]
+    - item.cron is defined
+  ansible.builtin.file:
+    path: "/etc/cron.d/{{ item.cron }}"
+    state: absent
+  loop: "{{ snmp_librenms_extensions }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: "Linux : Remove inactive LibreNMS extension leftovers"
+  become: true
+  tags:
+    - configuration
+  when: not snmp_extension_enabled[item.0.name]
+  ansible.builtin.file:
+    path: "{{ item.1 }}"
+    state: absent
+  loop: "{{ snmp_librenms_extensions | subelements('cleanup', skip_missing=True) }}"
+  loop_control:
+    label: "{{ item.1 }}"
+
+- name: "Linux : remove selinux context for smart-v1 cache file"
+  become: true
+  tags:
+    - configuration
+  when:
+    - not snmp_extension_enabled['smart-v1']
+    - ansible_facts['os_family'] == "RedHat"
+    - ansible_facts['selinux']['status'] | default('disabled') == "enabled"
+  community.general.sefcontext:
+    target: '/var/cache/smart'
+    setype: snmpd_var_lib_t
+    state: absent
 
 - name: "Linux : configure snmpd daemon"
   become: true
