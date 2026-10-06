@@ -1,11 +1,5 @@
 ---
 collections:
-  - name: ansible.netcommon
-    source: https://galaxy.ansible.com
-  - name: ansible.posix
-    source: https://galaxy.ansible.com
-  - name: ansible.utils
-    source: https://galaxy.ansible.com
   - name: ansible.windows
     source: https://galaxy.ansible.com
     version: ">=1.5.0"  # win_powershell
