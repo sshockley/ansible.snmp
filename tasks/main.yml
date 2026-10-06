@@ -16,6 +16,17 @@
     - configuration
     - packages
 
+- name: 'Verify SNMP community is set'
+  ansible.builtin.assert:
+    that:
+      - snmp_community is defined
+      - snmp_community | length > 0
+    fail_msg: Set snmp_community before running this role on Windows.
+  when: ansible_os_family == "Windows"
+  tags:
+    - configuration
+    - packages
+
 # NOTE: the "{{ ansible_distribution[:19] }}.yml" entry below truncates
 # e.g. "Microsoft Windows 10 Pro" / "Microsoft Windows 11 Enterprise" to
 # "Microsoft Windows 1" so Windows client editions match the

@@ -26,6 +26,7 @@ ansible-galaxy install sbaerlocher.snmp
 | snmp_user                      | snmp                                                                    | SNMP User                                       |
 | snmp_password                  | snmp_password                                                           | SNMP Password                                   |
 | snmp_encryption                | snmp_encryption                                                         | SNMP Encryption                                 |
+| snmp_community                 |                                                                         | Windows only, required: SNMP v2 community       |
 | snmp_contact                   |                                                                         | Optional: System Contact                        |
 | snmp_location                  |                                                                         | Optional: System Location                       |
 | snmp_agentaddress_protocol.ipvX | udp / udp6                                                              | Optional: SNMP Protocol, X for ipv4 or ipv6     |
