@@ -36,40 +36,22 @@
 # e.g. "Microsoft Windows 10 Pro" / "Microsoft Windows 11 Enterprise" to
 # "Microsoft Windows 1" so Windows client editions match the
 # "Microsoft Windows 1.yml" vars/tasks files. Do not rename those files.
-- name: 'Add OS specific variables'
-  ansible.builtin.include_vars: "{{ loop_vars }}"
-  with_first_found:
-    - files:
-        - "{{ ansible_distribution }}-{{ ansible_distribution_version }}.yml"
-        - "{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
-        - "{{ ansible_distribution }}.yml"
-        - "{{ ansible_distribution[:19] }}.yml"
-        - "{{ ansible_os_family }}.yml"
-        - "{{ ansible_system }}.yml"
-        - "defaults.yml"
-      paths:
-        - "vars"
-  loop_control:
-    loop_var: loop_vars
+- name: 'Load OS specific variables and tasks'
+  vars:
+    snmp_os_files:
+      - "{{ ansible_distribution }}-{{ ansible_distribution_version }}.yml"
+      - "{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+      - "{{ ansible_distribution }}.yml"
+      - "{{ ansible_distribution[:19] }}.yml"
+      - "{{ ansible_os_family }}.yml"
+      - "{{ ansible_system }}.yml"
+      - "defaults.yml"
   tags:
     - configuration
     - packages
+  block:
+    - name: 'Add OS specific variables'
+      ansible.builtin.include_vars: "{{ lookup('ansible.builtin.first_found', files=snmp_os_files, paths=['vars']) }}"
 
-- name: 'Include distribution tasks'
-  ansible.builtin.include_tasks: "{{ loop_distribution }}"
-  with_first_found:
-    - files:
-        - "{{ ansible_distribution }}-{{ ansible_distribution_version }}.yml"
-        - "{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
-        - "{{ ansible_distribution }}.yml"
-        - "{{ ansible_distribution[:19] }}.yml"
-        - "{{ ansible_os_family }}.yml"
-        - "{{ ansible_system }}.yml"
-        - "defaults.yml"
-      paths:
-        - "distribution"
-  loop_control:
-    loop_var: loop_distribution
-  tags:
-    - configuration
-    - packages
+    - name: 'Include distribution tasks'
+      ansible.builtin.include_tasks: "{{ lookup('ansible.builtin.first_found', files=snmp_os_files, paths=['distribution']) }}"
