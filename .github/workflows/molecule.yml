@@ -13,7 +13,6 @@ jobs:
       fail-fast: false
       matrix:
         distro:
-          - rockylinux8
           - rockylinux9
           - debian12
           - ubuntu2204
