@@ -1,5 +1,5 @@
 ---
-# defaults file for sbaerlocher.snmp
+# defaults file for sshockley.snmp
 
 snmp_additional_packages: []
 snmp_linux_config_files_packages: []

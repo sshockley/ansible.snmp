@@ -1,4 +1,4 @@
 ---
-# vars file for sbaerlocher.snmp
+# vars file for sshockley.snmp
 
 snmp_name: "SNMP-Service"

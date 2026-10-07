@@ -1,5 +1,5 @@
 ---
-# handlers file for sbaerlocher.snmp
+# handlers file for sshockley.snmp
 
 - name: Restart snmp
   become: true
