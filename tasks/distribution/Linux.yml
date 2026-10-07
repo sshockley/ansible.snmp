@@ -375,6 +375,7 @@
     selevel: s0
   register: snmp_config_check
   check_mode: true
+  diff: false  # contains passwords
 
 - name: "Linux : Configure snmp"
   when: snmp_config_check is changed
@@ -399,6 +400,7 @@
         serole: object_r
         setype: etc_t
         selevel: s0
+      diff: false  # contains passwords
       notify:
         - Restart snmp
   always:

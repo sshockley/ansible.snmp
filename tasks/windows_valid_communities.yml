@@ -6,6 +6,7 @@
   ansible.windows.win_reg_stat:
     path: 'HKLM:\SYSTEM\CurrentControlSet\Services\SNMP\Parameters\ValidCommunities'
   register: snmp_valid_communities_reg
+  no_log: true
 
 - name: 'Windows : set SNMP community'
   ansible.windows.win_regedit:
@@ -13,6 +14,7 @@
     name: '{{ snmp_community }}'
     type: dword
     data: 4  # READ ONLY
+  no_log: true
   notify:
     - Restart win snmp
 
