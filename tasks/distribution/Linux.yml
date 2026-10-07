@@ -388,6 +388,13 @@
         name: "{{ snmp_service_name }}"
         state: stopped
 
+    - name: "Linux : Remove saved SNMPv3 users"
+      become: true
+      ansible.builtin.lineinfile:
+        path: "{{ snmp_persistent_directory }}/snmpd.conf"
+        regexp: '^usmUser '
+        state: absent
+
     - name: "Linux : Create snmp config"
       become: true
       ansible.builtin.template:
