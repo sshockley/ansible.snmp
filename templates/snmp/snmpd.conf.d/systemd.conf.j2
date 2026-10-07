@@ -1,3 +1,1 @@
-{% if "systemd" in ansible_facts.service_mgr %}
 extend systemd /bin/cat {{ snmp_persistent_directory }}/systemd
-{% endif %}
