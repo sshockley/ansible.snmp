@@ -63,15 +63,11 @@ The role also installs some LibreNMS extensions from `snmp_librenms_repo`. When 
 | snmp_agentaddress_address.ipv4/6  | {{ ansible_default_ipv4.address }} / {{ ansible_default_ipv6.address }} | Optional: SNMP bind address                                                      |
 | snmp_agentaddress_port.ipv4/6     | 161 / 161                                                               | Optional: SNMP port                                                              |
 | snmp_agentx_enabled               | false                                                                   | Optional: enable AgentX                                                          |
-| snmp_logging_options              | ''                                                                      | snmpd logging options                                                            |
 | snmp_additional_packages          | []                                                                      | Extra packages to install with snmpd                                             |
 | snmp_extension_scripts            | /usr/local/lib/snmpd                                                    | Directory for extension scripts                                                  |
 | snmp_extension_list               | []                                                                      | Extra extensions: list of `url` (script) and `extend` (snmpd `extend` arguments) |
 | snmp_librenms_repo                | master branch of sshockley/librenms-agent                               | Source for LibreNMS agent scripts                                                |
 | snmp_include_smart                | false                                                                   | Install smartmontools and the smart-v1 extension                                 |
-| snmp_linux_config_files_packages  | [] (per-distro in vars/)                                                | linux_config_files extension dependencies                                        |
-| snmp_zfs_packages                 | [] (per-distro in vars/)                                                | zfs extension dependencies                                                       |
-| snmp_smartmontools_packages       | [] (per-distro in vars/)                                                | Packages for S.M.A.R.T. monitoring                                               |
 
 ## Dependencies
 

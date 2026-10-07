@@ -2,12 +2,8 @@
 # defaults file for sshockley.snmp
 
 snmp_additional_packages: []
-snmp_linux_config_files_packages: []
-snmp_smartmontools_packages: []
-snmp_zfs_packages: []
 snmp_encryption: snmp_encryption
 snmp_extension_scripts: '/usr/local/lib/snmpd'
-snmp_logging_options: ''
 snmp_permitted_managers: []
 snmp_password: snmp_password
 snmp_user: snmp
