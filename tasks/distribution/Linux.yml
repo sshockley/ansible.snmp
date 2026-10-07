@@ -342,6 +342,41 @@
   notify:
     - Restart snmp
 
+- name: "Linux : Make the snmpd unit use the daemon options file"
+  become: true
+  when: ansible_facts['os_family'] == 'Debian'
+  tags:
+    - configuration
+  block:
+    - name: "Linux : Create the snmpd unit drop-in directory"
+      ansible.builtin.file:
+        path: /etc/systemd/system/snmpd.service.d
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: "Linux : Install the snmpd unit drop-in"
+      ansible.builtin.copy:
+        content: |
+          # {{ ansible_managed }}
+          [Service]
+          EnvironmentFile=-{{ snmp_daemon_config }}
+          ExecStart=
+          ExecStart=/usr/sbin/snmpd $SNMPDOPTS -f
+        dest: /etc/systemd/system/snmpd.service.d/options.conf
+        owner: root
+        group: root
+        mode: "0644"
+      register: snmp_unit_dropin
+      notify:
+        - Restart snmp
+
+    - name: "Linux : Reload systemd after changing the snmpd unit drop-in"
+      when: snmp_unit_dropin is changed
+      ansible.builtin.systemd_service:
+        daemon_reload: true
+
 - name: "Linux : Install snmpd extensions config"
   become: true
   tags:
