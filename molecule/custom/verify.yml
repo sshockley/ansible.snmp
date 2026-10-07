@@ -68,7 +68,7 @@
       failed_when: verify_external.rc == 0
 
     - name: Check the role rejects unsafe credentials
-      ansible.builtin.include_tasks: rejected_credentials.yml
+      ansible.builtin.include_tasks: tasks/rejected_credentials.yml
       loop:
         - name: placeholder defaults
           password: snmp_password
