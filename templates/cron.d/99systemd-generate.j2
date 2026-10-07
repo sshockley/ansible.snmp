@@ -1,6 +1,6 @@
 # {{ ansible_managed }}
-# Run the hourly jobs
+# Schedule set by snmp_cron_systemd
 SHELL=/bin/bash
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 MAILTO=root
-*/5 * * * * root {{ snmp_extension_scripts }}/systemd.py > {{ snmp_persistent_directory }}/systemd.tmp && mv {{ snmp_persistent_directory }}/systemd.tmp {{ snmp_persistent_directory }}/systemd
+{{ snmp_cron_systemd }} root {{ snmp_extension_scripts }}/systemd.py > {{ snmp_persistent_directory }}/systemd.tmp && mv {{ snmp_persistent_directory }}/systemd.tmp {{ snmp_persistent_directory }}/systemd

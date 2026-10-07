@@ -26,3 +26,8 @@ snmp_extension_list: []
 #     extend: '.1.3.6.1.4.1.2021.7890.1 distro {{ snmp_extension_scripts }}/distro'
 
 snmp_include_smart: false
+
+# cron schedules (minute hour day month weekday) for the LibreNMS extension jobs
+snmp_cron_osupdates: '0 * * * *'
+snmp_cron_systemd: '0 * * * *'
+snmp_cron_smart: '0 * * * *'

@@ -1,6 +1,6 @@
 # {{ ansible_managed }}
-# Run the hourly jobs
+# Schedule set by snmp_cron_smart
 SHELL=/bin/bash
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 MAILTO=root
-*/5 * * * * root {{ snmp_extension_scripts }}/smart-v1 -u
+{{ snmp_cron_smart }} root {{ snmp_extension_scripts }}/smart-v1 -u
