@@ -3,7 +3,7 @@
 galaxy_info:
   namespace: sshockley
   role_name: snmp
-  author: 'Steve Shockley (based on sshockley.snmp by Simon Bärlocher)'
+  author: 'Steve Shockley (based on sbaerlocher.snmp by Simon Bärlocher)'
   description: 'Install and configure SNMPv3 with LibreNMS extensions on Linux, and SNMP v2c on Windows.'
   license: MIT
   min_ansible_version: '2.15'

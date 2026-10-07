@@ -1,6 +1,6 @@
 ---
 # tasks file for sshockley.snmp
 
-- name: Message
+- name: "Unsupported system"
   ansible.builtin.debug:
     msg: "Your {{ ansible_system }} is not supported"

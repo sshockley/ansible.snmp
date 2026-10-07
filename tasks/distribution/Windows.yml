@@ -1,12 +1,12 @@
 ---
 # tasks file for sshockley.snmp
 
-- name: 'Windows : install SNMP'
+- name: 'Windows : Install SNMP'
   ansible.windows.win_feature:
     name: "{{ snmp_name }}"
     state: present
 
-- name: 'Windows : setting SNMP'
+- name: 'Windows : Setting SNMP'
   ansible.windows.win_regedit:
     path: 'HKLM:\SYSTEM\CurrentControlSet\Services\SNMP\Parameters\{{ item.path }}'
     name: '{{ item.name }}'
@@ -24,15 +24,15 @@
   notify:
     - Restart win snmp
 
-- name: 'Windows : configure SNMP community'
+- name: 'Windows : Configure SNMP community'
   ansible.builtin.include_tasks:
     file: "{{ role_path }}/tasks/windows_valid_communities.yml"
 
-- name: 'Windows : configure permitted SNMP managers'
+- name: 'Windows : Configure permitted SNMP managers'
   ansible.builtin.include_tasks:
     file: "{{ role_path }}/tasks/windows_permitted_managers.yml"
 
-- name: Enable all the Firewall rules in application group
+- name: "Windows : Enable all the Firewall rules in application group"
   community.windows.win_firewall_rule:
     group: "@firewallapi.dll,-50303"
     enabled: true

@@ -14,7 +14,7 @@ The role is not published on Ansible Galaxy; install it from git with a `require
 
 ```yml
 roles:
-  - name: sbaerlocher.snmp
+  - name: sshockley.snmp
     src: https://github.com/sshockley/ansible.snmp.git
     scm: git
     version: master
@@ -78,7 +78,7 @@ None
 ```yml
 - hosts: all
   roles:
-    - role: sbaerlocher.snmp
+    - role: sshockley.snmp
       vars:
         snmp_password: "{{ vault_snmp_password }}"
         snmp_encryption: "{{ vault_snmp_encryption }}"

@@ -8,7 +8,7 @@
   ansible.builtin.package:
     name: "{{ snmp_packages + snmp_additional_packages }}"
 
-- name: Gather the package facts
+- name: "Linux : Gather the package facts"
   tags:
     - always
   ansible.builtin.package_facts:
@@ -70,7 +70,7 @@
   loop_control:
     label: "{{ item.url }}"
 
-- name: "Linux : proxmox extension prerequisites"
+- name: "Linux : Proxmox extension prerequisites"
   become: true
   tags:
     - configuration
@@ -108,19 +108,19 @@
       ansible.builtin.package:
         name: "{{ snmp_linux_config_files_packages }}"
 
-- name: "Linux : zfs extension prerequisites"
+- name: "Linux : ZFS extension prerequisites"
   become: true
   tags:
     - configuration
   when: snmp_extension_enabled['zfs']
   block:
-    - name: "Linux : Install zfs script dependencies"
+    - name: "Linux : Install ZFS script dependencies"
       tags:
         - packages
       ansible.builtin.package:
         name: "{{ snmp_zfs_packages }}"
       when: snmp_zfs_packages | length > 0
-    - name: "Linux - Configure SELinux"
+    - name: "Linux : Configure SELinux"
       when:
         - ansible_facts['os_family'] == "RedHat"
         - ansible_facts['selinux']['status'] | default('disabled') == "enabled"
@@ -148,16 +148,16 @@
           ansible.builtin.stat:
             path: '{{ snmp_confdir }}/snmp_nfs_zfs.pp'
           register: snmp_selinux_pp
-        - name: "Linux - Build and install SELinux module"
+        - name: "Linux : Build and install SELinux module"
           when: snmp_selinux_te is changed or not snmp_selinux_pp.stat.exists
           block:
-            - name: "Linux - Configure SELinux checkmodule"
+            - name: "Linux : Configure SELinux checkmodule"
               ansible.builtin.command: 'checkmodule -M -m -o {{ snmp_confdir }}/snmp_nfs_zfs.mod {{ snmp_confdir }}/snmp_nfs_zfs.te'
               changed_when: true
-            - name: "Linux - Configure SELinux package"
+            - name: "Linux : Configure SELinux package"
               ansible.builtin.command: 'semodule_package -m {{ snmp_confdir }}/snmp_nfs_zfs.mod -o {{ snmp_confdir }}/snmp_nfs_zfs.pp'
               changed_when: true
-            - name: "Linux - Configure SELinux package install"
+            - name: "Linux : Configure SELinux package install"
               ansible.builtin.command: 'semodule -i {{ snmp_confdir }}/snmp_nfs_zfs.pp'
               changed_when: true
 
@@ -231,13 +231,13 @@
   loop_control:
     label: "{{ item.name }}"
 
-- name: "Linux : configure smart-v1 extension"
+- name: "Linux : Configure smart-v1 extension"
   become: true
   tags:
     - configuration
   when: snmp_extension_enabled['smart-v1']
   block:
-    - name: "Linux : configure selinux for smart-v1 cache file"
+    - name: "Linux : Configure selinux for smart-v1 cache file"
       when:
         - ansible_facts['os_family'] == "RedHat"
         - ansible_facts['selinux']['status'] | default('disabled') == "enabled"
@@ -245,7 +245,7 @@
         target: '/var/cache/smart'
         setype: snmpd_var_lib_t
         state: present
-    - name: "Linux - Generate smart-v1 config file" # noqa: command-instead-of-shell no-changed-when
+    - name: "Linux : Generate smart-v1 config file" # noqa: command-instead-of-shell no-changed-when
       ansible.builtin.shell: >-
         {{ snmp_extension_scripts }}/smart-v1 -g -C > {{ snmp_extension_scripts }}/smart-v1.config.tmp
         && mv {{ snmp_extension_scripts }}/smart-v1.config.tmp {{ snmp_extension_scripts }}/smart-v1.config
@@ -312,7 +312,7 @@
   loop_control:
     label: "{{ item.1 }}"
 
-- name: "Linux : remove selinux context for smart-v1 cache file"
+- name: "Linux : Remove selinux context for smart-v1 cache file"
   become: true
   tags:
     - configuration
@@ -325,7 +325,7 @@
     setype: snmpd_var_lib_t
     state: absent
 
-- name: "Linux : configure snmpd daemon"
+- name: "Linux : Configure snmpd daemon"
   become: true
   tags:
     - configuration
@@ -342,7 +342,7 @@
   notify:
     - Restart snmp
 
-- name: "Linux : install snmpd extensions config"
+- name: "Linux : Install snmpd extensions config"
   become: true
   tags:
     - configuration
@@ -359,7 +359,7 @@
   notify:
     - Restart snmp
 
-- name: "Linux : check create snmp config"
+- name: "Linux : Check create snmp config"
   become: true
   tags:
     - configuration
@@ -382,7 +382,7 @@
   tags:
     - configuration
   block:
-    - name: "Linux : stopped snmp"
+    - name: "Linux : Stopped snmp"
       become: true
       ansible.builtin.service:
         name: "{{ snmp_service_name }}"
