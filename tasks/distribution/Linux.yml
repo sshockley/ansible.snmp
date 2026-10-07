@@ -169,34 +169,80 @@
             name:
               - checkpolicy
               - policycoreutils
-        - name: "Linux : Create SELinux configuration file"
+        - name: "Linux : Create SELinux policy source directory"
+          ansible.builtin.file:
+            path: "{{ snmp_selinux_source_dir }}"
+            state: directory
+            owner: root
+            group: root
+            mode: "0755"
+        # Kept so a changed policy upstream triggers a rebuild
+        - name: "Linux : Download SELinux policy source"
           ansible.builtin.get_url:
             url: '{{ snmp_librenms_repo + "/snmp/snmp_nfs_zfs.te" }}'
-            dest: '{{ snmp_confdir + "/" }}'
+            dest: "{{ snmp_selinux_source_dir }}/snmp_nfs_zfs.te"
             owner: root
             group: root
             mode: "0644"
-            seuser: system_u
-            serole: object_r
-            setype: etc_t
-            selevel: s0
           register: snmp_selinux_te
-        - name: "Linux : Check for compiled SELinux package"
-          ansible.builtin.stat:
-            path: '{{ snmp_confdir }}/snmp_nfs_zfs.pp'
-          register: snmp_selinux_pp
+        - name: "Linux : List installed SELinux modules"
+          ansible.builtin.command:
+            argv: [semodule, -l]
+          register: snmp_selinux_modules
+          changed_when: false
+          check_mode: false
         - name: "Linux : Build and install SELinux module"
-          when: snmp_selinux_te is changed or not snmp_selinux_pp.stat.exists
+          when: >-
+            snmp_selinux_te is changed
+            or 'snmp_nfs_zfs' not in (snmp_selinux_modules.stdout_lines | select | map('split') | map('first'))
           block:
-            - name: "Linux : Configure SELinux checkmodule"
-              ansible.builtin.command: 'checkmodule -M -m -o {{ snmp_confdir }}/snmp_nfs_zfs.mod {{ snmp_confdir }}/snmp_nfs_zfs.te'
+            - name: "Linux : Create SELinux module build directory"
+              ansible.builtin.tempfile:
+                state: directory
+                suffix: .snmp_selinux
+              register: snmp_selinux_build
+            - name: "Linux : Compile SELinux module"
+              ansible.builtin.command:
+                argv:
+                  - checkmodule
+                  - -M
+                  - -m
+                  - -o
+                  - "{{ snmp_selinux_build.path }}/snmp_nfs_zfs.mod"
+                  - "{{ snmp_selinux_source_dir }}/snmp_nfs_zfs.te"
               changed_when: true
-            - name: "Linux : Configure SELinux package"
-              ansible.builtin.command: 'semodule_package -m {{ snmp_confdir }}/snmp_nfs_zfs.mod -o {{ snmp_confdir }}/snmp_nfs_zfs.pp'
+            - name: "Linux : Package SELinux module"
+              ansible.builtin.command:
+                argv:
+                  - semodule_package
+                  - -m
+                  - "{{ snmp_selinux_build.path }}/snmp_nfs_zfs.mod"
+                  - -o
+                  - "{{ snmp_selinux_build.path }}/snmp_nfs_zfs.pp"
               changed_when: true
-            - name: "Linux : Configure SELinux package install"
-              ansible.builtin.command: 'semodule -i {{ snmp_confdir }}/snmp_nfs_zfs.pp'
+            - name: "Linux : Install SELinux module"
+              ansible.builtin.command:
+                argv: [semodule, -i, "{{ snmp_selinux_build.path }}/snmp_nfs_zfs.pp"]
               changed_when: true
+          always:
+            - name: "Linux : Remove SELinux module build directory"
+              when: snmp_selinux_build.path is defined
+              ansible.builtin.file:
+                path: "{{ snmp_selinux_build.path }}"
+                state: absent
+
+# Earlier versions of the role built the module in snmp_confdir
+- name: "Linux : Remove SELinux build files from snmp_confdir"
+  become: true
+  tags:
+    - configuration
+  ansible.builtin.file:
+    path: "{{ snmp_confdir }}/{{ item }}"
+    state: absent
+  loop:
+    - snmp_nfs_zfs.te
+    - snmp_nfs_zfs.mod
+    - snmp_nfs_zfs.pp
 
 - name: "Linux : Install smartmontools"
   become: true
