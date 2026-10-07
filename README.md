@@ -104,6 +104,15 @@ MOLECULE_DISTRO=debian12 molecule test            # default scenario
 MOLECULE_DISTRO=rockylinux9 molecule test -s custom
 ```
 
+With rootless Podman
+
+```bash
+pip install ansible-core molecule 'molecule-plugins[podman]'
+ansible-galaxy collection install containers.podman
+ansible-galaxy collection install -r requirements.yaml
+MOLECULE_DISTRO=debian12 molecule -c .config/molecule/podman.yml test -s custom
+```
+
 `MOLECULE_DISTRO` selects a `geerlingguy/docker-<distro>-ansible` image. Windows is not covered by the tests.
 
 ## Authors

@@ -1,0 +1,13 @@
+---
+# Base Molecule config for Podman, including rootless Podman:
+#   molecule -c .config/molecule/podman.yml test -s default
+# Podman's systemd mode sets up cgroups and tmpfs mounts for the container's
+# init, so no privileged mode or host cgroup mount is needed.
+driver:
+  name: podman
+platforms:
+  - name: snmp-${MOLECULE_SCENARIO_NAME}-${MOLECULE_DISTRO:-rockylinux9}
+    image: docker.io/geerlingguy/docker-${MOLECULE_DISTRO:-rockylinux9}-ansible:latest
+    command: /lib/systemd/systemd
+    systemd: always
+    pre_build_image: true
