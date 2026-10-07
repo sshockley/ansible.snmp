@@ -1,6 +1,6 @@
 # Ansible Role: SNMP
 
-[![Lint](https://github.com/sshockley/ansible.snmp/actions/workflows/lint.yml/badge.svg)](https://github.com/sshockley/ansible.snmp/actions/workflows/lint.yml) [![license](https://img.shields.io/github/license/sshockley/ansible.snmp.svg?style=popout-square)](LICENSE)
+[![Lint](https://github.com/sshockley/ansible.snmp/actions/workflows/lint.yml/badge.svg)](https://github.com/sshockley/ansible.snmp/actions/workflows/lint.yml) [![Molecule](https://github.com/sshockley/ansible.snmp/actions/workflows/molecule.yml/badge.svg)](https://github.com/sshockley/ansible.snmp/actions/workflows/molecule.yml) [![license](https://img.shields.io/github/license/sshockley/ansible.snmp.svg?style=popout-square)](LICENSE)
 
 ## Description
 
@@ -84,6 +84,27 @@ None
         snmp_location: "Server room"
         snmp_contact: "ops@example.com"
 ```
+
+## Testing
+
+Linux support is tested with [Molecule](https://ansible.readthedocs.io/projects/molecule/) in Docker, using systemd-enabled images, on every push and pull request.
+
+| Scenario | Covers                                                                                                                              |
+| :------- | :---------------------------------------------------------------------------------------------------------------------------------- |
+| default  | Install, LibreNMS extensions, removal of stale extensions, `snmp_extension_list`, idempotence, SNMPv3 queries and rejected access |
+| custom   | Custom user, loopback-only bind on a custom port, AgentX, and rejection of unsafe credentials                                       |
+
+To run locally (Linux or WSL with Docker):
+
+```bash
+pip install ansible-core molecule 'molecule-plugins[docker]'
+ansible-galaxy collection install community.docker
+ansible-galaxy collection install -r requirements.yaml
+MOLECULE_DISTRO=debian12 molecule test            # default scenario
+MOLECULE_DISTRO=rockylinux9 molecule test -s custom
+```
+
+`MOLECULE_DISTRO` selects a `geerlingguy/docker-<distro>-ansible` image. Windows is not covered by the tests.
 
 ## Authors
 

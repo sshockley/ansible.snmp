@@ -1,0 +1,96 @@
+---
+- name: Verify
+  hosts: all
+  vars:
+    verify_snmp_args:
+      - -v3
+      - -l
+      - authPriv
+      - -u
+      - "{{ snmp_user }}"
+      - -a
+      - SHA
+      - -A
+      - "{{ snmp_password }}"
+      - -x
+      - AES
+      - -X
+      - "{{ snmp_encryption }}"
+      - -t
+      - "1"
+      - -r
+      - "0"
+      - -On
+      - -Oqv
+    verify_oid_sysname: .1.3.6.1.2.1.1.5.0
+    verify_oid_syslocation: .1.3.6.1.2.1.1.6.0
+  tasks:
+    - name: Read snmpd.conf
+      ansible.builtin.slurp:
+        src: /etc/snmp/snmpd.conf
+      register: verify_conf_raw
+
+    - name: Check snmpd.conf contents
+      vars:
+        verify_conf: "{{ verify_conf_raw.content | b64decode }}"
+      ansible.builtin.assert:
+        that:
+          # Loopback is not repeated, and the missing ipv6 key disables IPv6
+          - "verify_conf | regex_findall('^agentAddress .*$', multiline=True) == ['agentAddress udp:127.0.0.1:1161']"
+          - "'rouser monitor priv' in verify_conf"
+          - "'master agentx' in verify_conf"
+          - "'sysContact' not in verify_conf"
+        fail_msg: "{{ verify_conf }}"
+
+    - name: Query sysLocation on the custom port
+      ansible.builtin.command:
+        argv: "{{ ['snmpget'] + verify_snmp_args + ['udp:127.0.0.1:1161', verify_oid_syslocation] }}"
+      register: verify_location
+      changed_when: false
+
+    - name: Check sysLocation
+      ansible.builtin.assert:
+        that: (verify_location.stdout | regex_replace('^"|"$', '')) == snmp_location
+        fail_msg: "Got {{ verify_location.stdout }}"
+
+    - name: Query the default port
+      ansible.builtin.command:
+        argv: "{{ ['snmpget'] + verify_snmp_args + ['udp:127.0.0.1:161', verify_oid_sysname] }}"
+      register: verify_default_port
+      changed_when: false
+      failed_when: verify_default_port.rc == 0
+
+    - name: Query the custom port on the default IPv4 address
+      ansible.builtin.command:
+        argv: "{{ ['snmpget'] + verify_snmp_args + ['udp:' ~ ansible_facts['default_ipv4']['address'] ~ ':1161', verify_oid_sysname] }}"
+      register: verify_external
+      changed_when: false
+      failed_when: verify_external.rc == 0
+
+    - name: Check the role rejects unsafe credentials
+      ansible.builtin.include_tasks: rejected_credentials.yml
+      loop:
+        - name: placeholder defaults
+          password: snmp_password
+          encryption: snmp_encryption
+        - name: short password
+          password: short
+          encryption: custom-priv-pass
+        - name: short encryption key
+          password: custom-auth-pass
+          encryption: 1234567
+        - name: whitespace
+          password: has a space
+          encryption: custom-priv-pass
+        - name: comment character
+          password: custom-auth-pass
+          encryption: "priv#pass1"
+        - name: quote
+          password: "auth\"pass1"
+          encryption: custom-priv-pass
+        - name: backslash
+          password: 'auth\pass1'
+          encryption: custom-priv-pass
+      loop_control:
+        loop_var: verify_case
+        label: "{{ verify_case.name }}"

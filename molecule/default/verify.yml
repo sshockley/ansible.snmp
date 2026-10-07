@@ -1,0 +1,264 @@
+---
+- name: Verify
+  hosts: all
+  vars:
+    verify_scripts: /usr/local/lib/snmpd
+    verify_confdir: /etc/snmp
+    verify_redhat: "{{ ansible_facts['os_family'] == 'RedHat' }}"
+    verify_persistent_directory: "{{ '/var/lib/net-snmp' if verify_redhat else '/var/lib/snmp' }}"
+    verify_snmp_args:
+      - -v3
+      - -l
+      - authPriv
+      - -u
+      - "{{ snmp_user }}"
+      - -a
+      - SHA
+      - -A
+      - "{{ snmp_password }}"
+      - -x
+      - AES
+      - -X
+      - "{{ snmp_encryption }}"
+      - -t
+      - "2"
+      - -r
+      - "1"
+      - -On
+      - -Oqv
+    # Numeric OIDs, so no MIB files are needed
+    verify_oid_sysname: .1.3.6.1.2.1.1.5.0
+    verify_oid_syslocation: .1.3.6.1.2.1.1.6.0
+    verify_oid_syscontact: .1.3.6.1.2.1.1.4.0
+    verify_oid_extend_config: .1.3.6.1.4.1.8072.1.3.2.2
+    # nsExtendOutput1Line."hello"
+    verify_oid_extend_hello: .1.3.6.1.4.1.8072.1.3.2.3.1.1.5.104.101.108.108.111
+    verify_oid_distro: .1.3.6.1.4.1.2021.7890.1
+  tasks:
+    # --- service -------------------------------------------------------------
+    - name: Gather service facts
+      ansible.builtin.service_facts:
+
+    - name: Check snmpd is running and enabled
+      ansible.builtin.assert:
+        that:
+          - ansible_facts.services['snmpd.service'].state == 'running'
+          - ansible_facts.services['snmpd.service'].status == 'enabled'
+
+    # --- main config ----------------------------------------------------------
+    - name: Stat snmpd.conf
+      ansible.builtin.stat:
+        path: "{{ verify_confdir }}/snmpd.conf"
+      register: verify_conf_stat
+
+    - name: Check snmpd.conf is only readable by root
+      ansible.builtin.assert:
+        that:
+          - verify_conf_stat.stat.exists
+          - verify_conf_stat.stat.pw_name == 'root'
+          - verify_conf_stat.stat.mode == '0600'
+
+    - name: Read snmpd.conf
+      ansible.builtin.slurp:
+        src: "{{ verify_confdir }}/snmpd.conf"
+      register: verify_conf_raw
+
+    - name: Check snmpd.conf contents
+      vars:
+        verify_conf: "{{ verify_conf_raw.content | b64decode }}"
+        verify_agentaddress: "{{ verify_conf | regex_search('^agentAddress (.*)$', '\\1', multiline=True) | first }}"
+      ansible.builtin.assert:
+        that:
+          - "('createUser ' ~ snmp_user ~ ' SHA ' ~ snmp_password ~ ' AES ' ~ snmp_encryption) in verify_conf"
+          - "('rouser ' ~ snmp_user ~ ' priv') in verify_conf"
+          - "('sysLocation ' ~ snmp_location) in verify_conf"
+          - "('sysContact ' ~ snmp_contact) in verify_conf"
+          - "('includeDir ' ~ verify_confdir ~ '/snmpd.conf.d') in verify_conf"
+          - "'master agentx' not in verify_conf"
+          - "('udp:' ~ ansible_facts['default_ipv4']['address'] ~ ':161') in verify_agentaddress.split(',')"
+          - "'udp:127.0.0.1:161' in verify_agentaddress.split(',')"
+        fail_msg: "Unexpected snmpd.conf (agentAddress: {{ verify_agentaddress }})"
+
+    - name: Read the snmpd daemon options file
+      ansible.builtin.slurp:
+        src: "{{ '/etc/sysconfig/snmpd' if verify_redhat else '/etc/default/snmpd' }}"
+      register: verify_daemon_raw
+
+    - name: Check the Debian daemon options run snmpd unprivileged
+      when: not verify_redhat
+      ansible.builtin.assert:
+        that:
+          - "'-u Debian-snmp -g Debian-snmp' in (verify_daemon_raw.content | b64decode)"
+
+    # --- extensions on disk ---------------------------------------------------
+    - name: Stat files that must exist
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      register: verify_present
+      loop: >-
+        {{ [verify_confdir ~ '/snmpd.conf.d/distro.conf',
+            verify_confdir ~ '/snmpd.conf.d/osupdates.conf',
+            verify_confdir ~ '/snmpd.conf.d/systemd.conf',
+            verify_confdir ~ '/snmpd.conf.d/extensions.conf',
+            verify_scripts ~ '/distro',
+            verify_scripts ~ '/osupdates-unpriv-generate.sh',
+            verify_scripts ~ '/systemd.py',
+            verify_scripts ~ '/hello.sh',
+            '/etc/cron.d/99osupdates-generate',
+            '/etc/cron.d/99systemd-generate']
+           + ([verify_confdir ~ '/snmpd.conf.d/linux_config_files.conf',
+               verify_scripts ~ '/linux_config_files.py'] if verify_redhat else []) }}
+
+    - name: Check active extension files exist
+      ansible.builtin.assert:
+        that: item.stat.exists
+        fail_msg: "{{ item.item }} is missing"
+        quiet: true
+      loop: "{{ verify_present.results }}"
+      loop_control:
+        label: "{{ item.item }}"
+
+    - name: Check extension scripts are executable
+      ansible.builtin.assert:
+        that:
+          - item.stat.executable
+          - item.stat.mode == '0755'
+        fail_msg: "{{ item.item }} is not mode 0755"
+        quiet: true
+      loop: "{{ verify_present.results | selectattr('item', 'match', verify_scripts) | list }}"
+      loop_control:
+        label: "{{ item.item }}"
+
+    - name: Stat files that must have been removed
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      register: verify_absent
+      loop: >-
+        {{ [verify_confdir ~ '/snmpd.conf.d/zfs.conf',
+            verify_confdir ~ '/snmpd.conf.d/proxmox.conf',
+            verify_confdir ~ '/snmpd.conf.d/smart-v1.conf',
+            verify_scripts ~ '/zfs',
+            verify_scripts ~ '/proxmox',
+            verify_scripts ~ '/smart-v1',
+            verify_scripts ~ '/smart-v1.config',
+            '/etc/cron.d/99smart-v1',
+            '/etc/sudoers.d/snmpd-proxmox']
+           + ([] if verify_redhat else [verify_confdir ~ '/snmpd.conf.d/linux_config_files.conf']) }}
+
+    - name: Check inactive extension files were removed
+      ansible.builtin.assert:
+        that: not item.stat.exists
+        fail_msg: "{{ item.item }} should have been removed"
+        quiet: true
+      loop: "{{ verify_absent.results }}"
+      loop_control:
+        label: "{{ item.item }}"
+
+    - name: Read the generated cron jobs
+      ansible.builtin.slurp:
+        src: "/etc/cron.d/{{ item }}"
+      register: verify_cron
+      loop:
+        - 99osupdates-generate
+        - 99systemd-generate
+
+    - name: Check cron jobs write to the persistent directory
+      ansible.builtin.assert:
+        that:
+          - "(verify_persistent_directory ~ '/') in (item.content | b64decode)"
+          - "(verify_scripts ~ '/') in (item.content | b64decode)"
+        quiet: true
+      loop: "{{ verify_cron.results }}"
+      loop_control:
+        label: "{{ item.item }}"
+
+    # --- SNMP queries ---------------------------------------------------------
+    - name: Query system OIDs over loopback
+      ansible.builtin.command:
+        argv: "{{ ['snmpget'] + verify_snmp_args + ['127.0.0.1', verify_oid_sysname, verify_oid_syslocation, verify_oid_syscontact] }}"
+      register: verify_system
+      changed_when: false
+
+    - name: Check system OIDs
+      vars:
+        verify_values: "{{ verify_system.stdout_lines | map('regex_replace', '^\"|\"$', '') | list }}"
+      ansible.builtin.assert:
+        that:
+          - verify_values[0] == ansible_facts['fqdn']
+          - verify_values[1] == snmp_location
+          - verify_values[2] == snmp_contact
+        fail_msg: "Got {{ verify_values }}"
+
+    - name: Query sysName over the default IPv4 address
+      ansible.builtin.command:
+        argv: "{{ ['snmpget'] + verify_snmp_args + [ansible_facts['default_ipv4']['address'], verify_oid_sysname] }}"
+      changed_when: false
+
+    - name: Query the snmp_extension_list extend
+      ansible.builtin.command:
+        argv: "{{ ['snmpget'] + verify_snmp_args + ['127.0.0.1', verify_oid_extend_hello] }}"
+      register: verify_hello
+      changed_when: false
+
+    - name: Check the snmp_extension_list extend runs
+      ansible.builtin.assert:
+        that: "'hello from molecule' in verify_hello.stdout"
+        fail_msg: "Got {{ verify_hello.stdout }}"
+
+    - name: Walk the configured extends
+      ansible.builtin.command:
+        argv: "{{ ['snmpwalk'] + verify_snmp_args + ['127.0.0.1', verify_oid_extend_config] }}"
+      register: verify_extends
+      changed_when: false
+
+    - name: Check only the active LibreNMS extends are loaded
+      ansible.builtin.assert:
+        that:
+          - "(verify_persistent_directory ~ '/osupdates.txt') in verify_extends.stdout"
+          - "(verify_persistent_directory ~ '/systemd') in verify_extends.stdout"
+          - "(verify_scripts ~ '/hello.sh') in verify_extends.stdout"
+          - "('linux_config_files.py' in verify_extends.stdout) == verify_redhat"
+          - "'smart-v1' not in verify_extends.stdout"
+          - "'/zfs' not in verify_extends.stdout"
+          - "'proxmox' not in verify_extends.stdout"
+          - "'/bin/true' not in verify_extends.stdout"
+        fail_msg: "{{ verify_extends.stdout }}"
+
+    - name: Walk the distro extension
+      ansible.builtin.command:
+        argv: "{{ ['snmpwalk'] + verify_snmp_args + ['127.0.0.1', verify_oid_distro] }}"
+      register: verify_distro
+      changed_when: false
+
+    - name: Check the distro extension returns data
+      ansible.builtin.assert:
+        that:
+          - verify_distro.stdout | length > 0
+          - "'No Such' not in verify_distro.stdout"
+        fail_msg: "{{ verify_distro.stdout }}"
+
+    # --- access control -------------------------------------------------------
+    - name: Query with a wrong authentication password
+      ansible.builtin.command:
+        argv: >-
+          {{ ['snmpget', '-v3', '-l', 'authPriv', '-u', snmp_user, '-a', 'SHA', '-A', 'wrong-auth-pass',
+              '-x', 'AES', '-X', snmp_encryption, '-t', '1', '-r', '0', '127.0.0.1', verify_oid_sysname] }}
+      register: verify_wrong_pass
+      changed_when: false
+      failed_when: verify_wrong_pass.rc == 0
+
+    - name: Query without privacy (authNoPriv)
+      ansible.builtin.command:
+        argv: >-
+          {{ ['snmpget', '-v3', '-l', 'authNoPriv', '-u', snmp_user, '-a', 'SHA', '-A', snmp_password,
+              '-t', '1', '-r', '0', '127.0.0.1', verify_oid_sysname] }}
+      register: verify_no_priv
+      changed_when: false
+      failed_when: verify_no_priv.rc == 0
+
+    - name: Query with SNMPv2c
+      ansible.builtin.command:
+        argv: ['snmpget', '-v2c', '-c', 'public', '-t', '1', '-r', '0', '127.0.0.1', "{{ verify_oid_sysname }}"]
+      register: verify_v2c
+      changed_when: false
+      failed_when: verify_v2c.rc == 0

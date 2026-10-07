@@ -1,0 +1,79 @@
+---
+- name: Prepare
+  hosts: all
+  vars:
+    prepare_packages:
+      RedHat:
+        - cronie
+        - net-snmp-utils
+      Debian:
+        - cron
+        - snmp
+    # Leftovers from extensions that do not apply in a container; the role
+    # must remove them. linux_config_files is replaced on EL and removed elsewhere.
+    prepare_stale_files:
+      - path: /etc/snmp/snmpd.conf.d/zfs.conf
+        content: "extend zfs /bin/true\n"
+      - path: /etc/snmp/snmpd.conf.d/proxmox.conf
+        content: "extend proxmox /bin/true\n"
+      - path: /etc/snmp/snmpd.conf.d/smart-v1.conf
+        content: "extend smart /bin/true\n"
+      - path: /etc/snmp/snmpd.conf.d/linux_config_files.conf
+        content: "extend linux_config_files /bin/true\n"
+      - path: /usr/local/lib/snmpd/zfs
+        content: "#!/bin/sh\n"
+      - path: /usr/local/lib/snmpd/proxmox
+        content: "#!/bin/sh\n"
+      - path: /usr/local/lib/snmpd/smart-v1
+        content: "#!/bin/sh\n"
+      - path: /usr/local/lib/snmpd/smart-v1.config
+        content: "cache=/var/cache/smart\n"
+      - path: /etc/cron.d/99smart-v1
+        content: "# stale\n"
+      - path: /etc/sudoers.d/snmpd-proxmox
+        content: "# stale\n"
+  tasks:
+    - name: Update apt cache
+      when: ansible_facts['os_family'] == 'Debian'
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Install cron and SNMP client tools
+      ansible.builtin.package:
+        name: "{{ prepare_packages[ansible_facts['os_family']] }}"
+
+    - name: Create directories for test fixtures
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+      loop:
+        - /opt/molecule
+        - /etc/snmp/snmpd.conf.d
+        - /usr/local/lib/snmpd
+        - /etc/cron.d
+        - /etc/sudoers.d
+
+    - name: Create the snmp_extension_list test script
+      ansible.builtin.copy:
+        content: |
+          #!/bin/sh
+          echo hello from molecule
+        dest: /opt/molecule/hello.sh
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Seed stale extension files
+      ansible.builtin.copy:
+        content: "{{ item.content }}"
+        dest: "{{ item.path }}"
+        owner: root
+        group: root
+        mode: "0440"
+      loop: "{{ prepare_stale_files }}"
+      loop_control:
+        label: "{{ item.path }}"

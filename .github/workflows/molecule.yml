@@ -1,0 +1,46 @@
+---
+name: Molecule
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  molecule:
+    name: ${{ matrix.scenario }} (${{ matrix.distro }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        distro:
+          - rockylinux8
+          - rockylinux9
+          - debian12
+          - ubuntu2204
+          - ubuntu2404
+        scenario:
+          - default
+        include:
+          - distro: rockylinux9
+            scenario: custom
+          - distro: debian12
+            scenario: custom
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - name: Install Molecule
+        run: pip install ansible-core molecule 'molecule-plugins[docker]'
+      - name: Install collection dependencies
+        run: |
+          ansible-galaxy collection install community.docker
+          ansible-galaxy collection install -r requirements.yaml
+      - name: Run Molecule
+        run: molecule test -s ${{ matrix.scenario }}
+        env:
+          MOLECULE_DISTRO: ${{ matrix.distro }}
+          PY_COLORS: '1'
+          ANSIBLE_FORCE_COLOR: '1'
