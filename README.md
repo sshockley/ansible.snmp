@@ -33,7 +33,7 @@ ansible-galaxy collection install -r requirements.yaml   # from this repository
 - Linux: `snmp_password` and `snmp_encryption` must be overridden (min. 8 characters).
 - Windows: `snmp_community` must be set.
 
-## Linux extensions
+## LibreNMS extensions
 
 The role also installs some LibreNMS extensions from `snmp_librenms_repo`. When the condition stops applying the extension is removed.
 
@@ -47,26 +47,9 @@ The role also installs some LibreNMS extensions from `snmp_librenms_repo`. When 
 | proxmox            | Proxmox (`pve`) kernel                                |
 | smart-v1           | `snmp_include_smart` is true and the host is not a VM |
 
-## Role Variables
 
-| Variable                          | Default                                                                 | Comments                                                                         |
-| :-------------------------------- | :---------------------------------------------------------------------- | :------------------------------------------------------------------------------- |
-| snmp_user                         | snmp                                                                    | Linux: SNMPv3 user                                                               |
-| snmp_password                     | snmp_password                                                           | Linux, required: SNMPv3 authentication (SHA) password                            |
-| snmp_encryption                   | snmp_encryption                                                         | Linux, required: SNMPv3 privacy (AES) password                                   |
-| snmp_community                    |                                                                         | Windows, required: SNMP v2c community                                            |
-| snmp_permitted_managers           | []                                                                      | Windows: list of permitted SNMP managers; empty allows any host                  |
-| snmp_contact                      |                                                                         | Optional: system contact                                                         |
-| snmp_location                     |                                                                         | Optional: system location                                                        |
-| snmp_agentaddress_protocol.ipv4/6 | udp / udp6                                                              | Optional: SNMP protocol                                                          |
-| snmp_agentaddress_address.ipv4 snmp_agentaddress_address.ipv6  | ansible_default_ipv4.address ansible_default_ipv6.address | Optional: SNMP bind address ('' disables; loopback always added)              |
-| snmp_agentaddress_port.ipv4 snmp_agentaddress_port.ipv6     | 161 / 161                                                               | Optional: SNMP port                                                              |
-| snmp_agentx_enabled               | false                                                                   | Optional: enable AgentX                                                          |
-| snmp_additional_packages          | []                                                                      | Extra packages to install with snmpd                                             |
-| snmp_extension_scripts            | /usr/local/lib/snmpd                                                    | Directory for extension scripts                                                  |
-| snmp_extension_list               | []                                                                      | Extra extensions: list of `url` (script) and `extend` (snmpd `extend` arguments) |
-| snmp_librenms_repo                | master branch of sshockley/librenms-agent                               | Source for LibreNMS agent scripts                                                |
-| snmp_include_smart                | false                                                                   | Install smartmontools and the smart-v1 extension                                 |
+## Role variables
+See [VARIABLES.md](VARIABLES.md)
 
 ## Dependencies
 
@@ -84,36 +67,6 @@ None
         snmp_location: "Server room"
         snmp_contact: "ops@example.com"
 ```
-
-## Testing
-
-Linux support is tested with [Molecule](https://ansible.readthedocs.io/projects/molecule/) in Docker, using systemd-enabled images.
-
-| Scenario | Covers                                                                                                                              |
-| :------- | :---------------------------------------------------------------------------------------------------------------------------------- |
-| default  | Install, LibreNMS extensions, removal of stale extensions, `snmp_extension_list`, idempotence, SNMPv3 queries and rejected access |
-| custom   | Custom user, loopback-only bind on a custom port, AgentX, password rotation, rejection of unsafe credentials                                |
-
-To run locally (Linux or WSL with Docker):
-
-```bash
-pip install ansible-core molecule 'molecule-plugins[docker]'
-ansible-galaxy collection install community.docker
-ansible-galaxy collection install -r requirements.yaml
-MOLECULE_DISTRO=debian12 molecule test            # default scenario
-MOLECULE_DISTRO=rockylinux9 molecule test -s custom
-```
-
-With rootless Podman
-
-```bash
-pip install ansible-core molecule 'molecule-plugins[podman]'
-ansible-galaxy collection install containers.podman
-ansible-galaxy collection install -r requirements.yaml
-MOLECULE_DISTRO=debian12 molecule -c .config/molecule/podman.yml test -s custom
-```
-
-`MOLECULE_DISTRO` selects a `geerlingguy/docker-<distro>-ansible` image. Windows is not covered by the tests.
 
 ## Authors
 
