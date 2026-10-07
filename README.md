@@ -29,7 +29,6 @@ ansible-galaxy collection install -r requirements.yaml   # from this repository
 
 - Ansible >= 2.15.
 - Collections listed in `requirements.yaml` (`ansible-galaxy collection install -r requirements.yaml`), including `community.general`, `ansible.windows` (>= 1.5.0), and `community.windows`.
-- Controller Python packages in `requirements.txt` (`jmespath`, `netaddr`, `dnspython`).
 - On RedHat-family hosts the role installs `epel-release`; the extras repository (Rocky/Alma/CentOS) must be available.
 - Linux: `snmp_password` and `snmp_encryption` must be overridden (min. 8 characters).
 - Windows: `snmp_community` must be set.
