@@ -2,7 +2,8 @@
 - name: Verify
   hosts: all
   vars:
-    verify_snmp_args:
+    # SNMPv3 options without the passwords
+    verify_v3_args:
       - -v3
       - -l
       - authPriv
@@ -10,18 +11,17 @@
       - "{{ snmp_user }}"
       - -a
       - SHA
-      - -A
-      - "{{ snmp_password }}"
       - -x
       - AES
-      - -X
-      - "{{ snmp_encryption }}"
       - -t
       - "1"
       - -r
       - "0"
       - -On
       - -Oqv
+    verify_snmp_args: "{{ verify_v3_args + ['-A', snmp_password, '-X', snmp_encryption] }}"
+    verify_rotated_password: rotated-auth-pass
+    verify_rotated_encryption: rotated-priv-pass
     verify_oid_sysname: .1.3.6.1.2.1.1.5.0
     verify_oid_syslocation: .1.3.6.1.2.1.1.6.0
   tasks:
@@ -94,3 +94,42 @@
       loop_control:
         loop_var: verify_case
         label: "{{ verify_case.name }}"
+
+    # --- password rotation ----------------------------------------------------
+    - name: Rotate the SNMPv3 passwords
+      ansible.builtin.include_role:
+        name: "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}"
+      vars:
+        snmp_password: "{{ verify_rotated_password }}"
+        snmp_encryption: "{{ verify_rotated_encryption }}"
+
+    - name: Restart snmpd with the rotated passwords
+      ansible.builtin.meta: flush_handlers
+
+    - name: Query with the rotated passwords
+      ansible.builtin.command:
+        argv: >-
+          {{ ['snmpget'] + verify_v3_args + ['-A', verify_rotated_password, '-X', verify_rotated_encryption,
+              'udp:127.0.0.1:1161', verify_oid_sysname] }}
+      changed_when: false
+
+    - name: Query with the old passwords
+      ansible.builtin.command:
+        argv: >-
+          {{ ['snmpget'] + verify_v3_args + ['-A', snmp_password, '-X', snmp_encryption,
+              'udp:127.0.0.1:1161', verify_oid_sysname] }}
+      register: verify_old_passwords
+      changed_when: false
+      failed_when: verify_old_passwords.rc == 0
+
+    - name: Restore the original passwords
+      ansible.builtin.include_role:
+        name: "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}"
+
+    - name: Restart snmpd with the original passwords
+      ansible.builtin.meta: flush_handlers
+
+    - name: Query with the original passwords again
+      ansible.builtin.command:
+        argv: "{{ ['snmpget'] + verify_snmp_args + ['udp:127.0.0.1:1161', verify_oid_sysname] }}"
+      changed_when: false

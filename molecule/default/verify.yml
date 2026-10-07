@@ -90,6 +90,31 @@
         that:
           - "'-u Debian-snmp -g Debian-snmp' in (verify_daemon_raw.content | b64decode)"
 
+    # The options file is only useful if the snmpd unit actually reads it
+    - name: Check the running snmpd uses the Debian daemon options
+      when: not verify_redhat
+      block:
+        - name: Get the snmpd main PID
+          ansible.builtin.command: systemctl show --property MainPID --value snmpd
+          register: verify_snmpd_pid
+          changed_when: false
+
+        - name: Read the snmpd command line
+          ansible.builtin.slurp:
+            src: "/proc/{{ verify_snmpd_pid.stdout | trim }}/cmdline"
+          register: verify_snmpd_cmdline_raw
+
+        - name: Check the snmpd command line
+          vars:
+            verify_snmpd_cmdline: >-
+              {{ (verify_snmpd_cmdline_raw.content | b64decode).split('\x00') | join(' ') }}
+            # From vars/Debian.yml and vars/Ubuntu.yml
+            verify_logging_options: "{{ '-Lsd' if ansible_facts['distribution'] == 'Ubuntu' else '-Lsed' }}"
+          ansible.builtin.assert:
+            that:
+              - "(verify_logging_options ~ ' -Lf /dev/null') in verify_snmpd_cmdline"
+            fail_msg: "snmpd is running as: {{ verify_snmpd_cmdline }}"
+
     # --- extensions on disk ---------------------------------------------------
     - name: Stat files that must exist
       ansible.builtin.stat:

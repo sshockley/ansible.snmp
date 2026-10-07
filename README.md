@@ -92,7 +92,7 @@ Linux support is tested with [Molecule](https://ansible.readthedocs.io/projects/
 | Scenario | Covers                                                                                                                              |
 | :------- | :---------------------------------------------------------------------------------------------------------------------------------- |
 | default  | Install, LibreNMS extensions, removal of stale extensions, `snmp_extension_list`, idempotence, SNMPv3 queries and rejected access |
-| custom   | Custom user, loopback-only bind on a custom port, AgentX, and rejection of unsafe credentials                                       |
+| custom   | Custom user, loopback-only bind on a custom port, AgentX, password rotation, rejection of unsafe credentials                                |
 
 To run locally (Linux or WSL with Docker):
 
