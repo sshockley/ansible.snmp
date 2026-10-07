@@ -95,13 +95,13 @@
       when: not verify_redhat
       block:
         - name: Get the snmpd main PID
-          ansible.builtin.command: systemctl show --property MainPID --value snmpd
-          register: verify_snmpd_pid
-          changed_when: false
+          ansible.builtin.systemd_service:
+            name: snmpd
+          register: verify_snmpd_unit
 
         - name: Read the snmpd command line
           ansible.builtin.slurp:
-            src: "/proc/{{ verify_snmpd_pid.stdout | trim }}/cmdline"
+            src: "/proc/{{ verify_snmpd_unit.status.MainPID }}/cmdline"
           register: verify_snmpd_cmdline_raw
 
         - name: Check the snmpd command line
