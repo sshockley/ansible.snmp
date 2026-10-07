@@ -1,0 +1,29 @@
+---
+# Manage HKLM:\...\SNMP\Parameters\ValidCommunities so snmp_community is the
+# only community; any other (e.g. a previous snmp_community) is removed.
+
+- name: 'Windows : read SNMP communities'
+  ansible.windows.win_reg_stat:
+    path: 'HKLM:\SYSTEM\CurrentControlSet\Services\SNMP\Parameters\ValidCommunities'
+  register: snmp_valid_communities_reg
+
+- name: 'Windows : set SNMP community'
+  ansible.windows.win_regedit:
+    path: 'HKLM:\SYSTEM\CurrentControlSet\Services\SNMP\Parameters\ValidCommunities'
+    name: '{{ snmp_community }}'
+    type: dword
+    data: 4  # READ ONLY
+  notify:
+    - Restart win snmp
+
+- name: 'Windows : remove stale SNMP communities'
+  ansible.windows.win_regedit:
+    path: 'HKLM:\SYSTEM\CurrentControlSet\Services\SNMP\Parameters\ValidCommunities'
+    name: '{{ item }}'
+    state: absent
+  loop: >-
+    {{ snmp_valid_communities_reg.properties | default({}) | list
+       | reject('in', ['', '(default)', snmp_community]) | list }}
+  no_log: true
+  notify:
+    - Restart win snmp

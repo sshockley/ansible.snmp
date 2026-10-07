@@ -21,12 +21,12 @@
       name: sysLocation
       type: string
       data: '{{ snmp_location | default() }}'
-    - path: ValidCommunities
-      name: '{{ snmp_community | default() }}'
-      type: dword
-      data: '4'
   notify:
     - Restart win snmp
+
+- name: 'Windows : configure SNMP community'
+  ansible.builtin.include_tasks:
+    file: "{{ role_path }}/tasks/windows_valid_communities.yml"
 
 - name: 'Windows : configure permitted SNMP managers'
   ansible.builtin.include_tasks:
