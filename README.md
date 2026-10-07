@@ -10,7 +10,7 @@ This is a fork of [sbaerlocher.snmp](https://galaxy.ansible.com/sbaerlocher/snmp
 
 ## Installation
 
-The role is not published on Ansible Galaxy; install it from git with a `requirements.yml`:
+The role is not published on Ansible Galaxy. Install it from git, together with the collections it needs, using a `requirements.yml` in your project:
 
 ```yml
 roles:
@@ -18,17 +18,25 @@ roles:
     src: https://github.com/sshockley/ansible.snmp.git
     scm: git
     version: master
+
+# Same versions as collections/requirements.yml
+collections:
+  - name: ansible.windows
+    version: ">=1.5.0,<4.0.0"
+  - name: community.general
+    version: ">=13.0.0,<14.0.0"
+  - name: community.windows
+    version: ">=3.0.0,<4.0.0"
 ```
 
 ```bash
-ansible-galaxy role install -r requirements.yml
-ansible-galaxy collection install -r requirements.yaml   # from this repository
+ansible-galaxy install -r requirements.yml
 ```
 
 ## Requirements
 
 - Ansible >= 2.15.
-- Collections listed in `requirements.yaml` (`ansible-galaxy collection install -r requirements.yaml`), including `community.general`, `ansible.windows` (>= 1.5.0), and `community.windows`.
+- The collections in [`collections/requirements.yml`](collections/requirements.yml): `ansible.windows`, `community.general` and `community.windows`.
 - On RedHat-family hosts the role installs `epel-release`; the extras repository (Rocky/Alma/CentOS) must be available.
 - Linux: `snmp_password` and `snmp_encryption` must be overridden (min. 8 characters).
 - Windows: `snmp_community` must be set.

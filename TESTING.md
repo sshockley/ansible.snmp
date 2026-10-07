@@ -14,7 +14,7 @@ python3 -m venv ~/.venvs/molecule
 source ~/.venvs/molecule/bin/activate
 pip install ansible-core molecule 'molecule-plugins[docker]'
 ansible-galaxy collection install community.docker
-ansible-galaxy collection install -r requirements.yaml
+ansible-galaxy collection install -r collections/requirements.yml
 MOLECULE_DISTRO=debian12 molecule test            # default scenario
 MOLECULE_DISTRO=rockylinux9 molecule test -s custom
 ```
@@ -26,7 +26,7 @@ python3 -m venv ~/.venvs/molecule
 source ~/.venvs/molecule/bin/activate
 pip install ansible-core molecule 'molecule-plugins[podman]'
 ansible-galaxy collection install containers.podman
-ansible-galaxy collection install -r requirements.yaml
+ansible-galaxy collection install -r collections/requirements.yml
 MOLECULE_DISTRO=debian12 molecule -c .config/molecule/podman.yml test -s custom
 ```
 
