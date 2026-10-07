@@ -18,6 +18,8 @@ provisioner:
   inventory:
     group_vars:
       all:
+        # Molecule connects as root; sudo fails PAM checks in EL
+        ansible_become: false
         snmp_user: snmp
         snmp_password: molecule-auth-pass
         snmp_encryption: molecule-priv-pass
