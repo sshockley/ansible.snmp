@@ -5,6 +5,10 @@
 #   cron:    optional template in templates/cron.d/, installed to /etc/cron.d/
 #   cleanup: extra files to remove when the extension no longer applies
 #   active:  whether the extension applies to this host
+
+# Where the ZFS extension's SELinux policy source is kept
+snmp_selinux_source_dir: /usr/local/share/selinux
+
 snmp_librenms_extensions:
   - name: distro
     url: snmp/distro
@@ -24,6 +28,8 @@ snmp_librenms_extensions:
     active: "{{ ansible_facts['os_family'] == 'RedHat' }}"
   - name: zfs
     url: snmp/zfs
+    cleanup:
+      - "{{ snmp_selinux_source_dir }}/snmp_nfs_zfs.te"
     active: "{{ 'zfs' in ansible_facts['packages'] or 'zfs-zed' in ansible_facts['packages'] }}"
   - name: proxmox
     url: agent-local/proxmox
