@@ -15,11 +15,11 @@ rouser {{ snmp_user }} priv
 agentAddress {{ snmp_agentaddresses | join(',') }}
 {% endif %}
 
-{% if snmp_location is defined %}
+{% if snmp_location | default('', true) | length > 0 %}
 sysLocation {{ snmp_location }}
 {% endif %}
 sysName {{ ansible_facts['fqdn'] }}
-{% if snmp_contact is defined %}
+{% if snmp_contact | default('', true) | length > 0 %}
 sysContact {{ snmp_contact }}
 {% endif %}
 
