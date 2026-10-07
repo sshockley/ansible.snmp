@@ -60,8 +60,8 @@ The role also installs some LibreNMS extensions from `snmp_librenms_repo`. When 
 | snmp_contact                      |                                                                         | Optional: system contact                                                         |
 | snmp_location                     |                                                                         | Optional: system location                                                        |
 | snmp_agentaddress_protocol.ipv4/6 | udp / udp6                                                              | Optional: SNMP protocol                                                          |
-| snmp_agentaddress_address.ipv4/6  | {{ ansible_default_ipv4.address }} / {{ ansible_default_ipv6.address }} | Optional: SNMP bind address                                                      |
-| snmp_agentaddress_port.ipv4/6     | 161 / 161                                                               | Optional: SNMP port                                                              |
+| snmp_agentaddress_address.ipv4 snmp_agentaddress_address.ipv6  | ansible_default_ipv4.address ansible_default_ipv6.address | Optional: SNMP bind address ('' disables; loopback always added)              |
+| snmp_agentaddress_port.ipv4 snmp_agentaddress_port.ipv6     | 161 / 161                                                               | Optional: SNMP port                                                              |
 | snmp_agentx_enabled               | false                                                                   | Optional: enable AgentX                                                          |
 | snmp_additional_packages          | []                                                                      | Extra packages to install with snmpd                                             |
 | snmp_extension_scripts            | /usr/local/lib/snmpd                                                    | Directory for extension scripts                                                  |

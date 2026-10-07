@@ -3,11 +3,14 @@
 createUser {{ snmp_user }} SHA {{ snmp_password }} AES {{ snmp_encryption }}
 
 rouser {{ snmp_user }} priv
+{% set snmp_ipv4 = snmp_agentaddress_address.ipv4 | default('') %}
+{% set snmp_ipv6 = snmp_agentaddress_address.ipv6 | default('') %}
+{% set snmp_ipv4_hosts = ([snmp_ipv4, '127.0.0.1'] | unique) if snmp_ipv4 else [] %}
+{% set snmp_ipv6_hosts = (['[' ~ snmp_ipv6 ~ ']', '[::1]'] | unique) if snmp_ipv6 else [] %}
+{# product() yields (protocol, host, port) tuples, joined as protocol:host:port #}
 {% set snmp_agentaddresses =
-     ([snmp_agentaddress_protocol.ipv4 ~ ':' ~ snmp_agentaddress_address.ipv4 ~ ':' ~ snmp_agentaddress_port.ipv4]
-      if ansible_default_ipv4.address is defined else [])
-   + ([snmp_agentaddress_protocol.ipv6 ~ ':[' ~ snmp_agentaddress_address.ipv6 ~ ']:' ~ snmp_agentaddress_port.ipv6]
-      if ansible_default_ipv6.address is defined else []) %}
+     [snmp_agentaddress_protocol.ipv4] | product(snmp_ipv4_hosts, [snmp_agentaddress_port.ipv4]) | map('join', ':') | list
+   + [snmp_agentaddress_protocol.ipv6] | product(snmp_ipv6_hosts, [snmp_agentaddress_port.ipv6]) | map('join', ':') | list %}
 {% if snmp_agentaddresses | length > 0 %}
 agentAddress {{ snmp_agentaddresses | join(',') }}
 {% endif %}
