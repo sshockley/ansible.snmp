@@ -18,7 +18,7 @@ agentAddress {{ snmp_agentaddresses | join(',') }}
 {% if snmp_location is defined %}
 sysLocation {{ snmp_location }}
 {% endif %}
-sysName {{ ansible_fqdn }}
+sysName {{ ansible_facts['fqdn'] }}
 {% if snmp_contact is defined %}
 sysContact {{ snmp_contact }}
 {% endif %}

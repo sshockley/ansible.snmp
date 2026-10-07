@@ -10,7 +10,7 @@
 | snmp_contact                      |                                                                         | Optional: system contact                                                         |
 | snmp_location                     |                                                                         | Optional: system location                                                        |
 | snmp_agentaddress_protocol.ipv4/6 | udp / udp6                                                              | Optional: SNMP protocol                                                          |
-| snmp_agentaddress_address.ipv4 snmp_agentaddress_address.ipv6  | ansible_default_ipv4.address ansible_default_ipv6.address | Optional: SNMP bind address ('' disables; loopback always added)              |
+| snmp_agentaddress_address.ipv4 snmp_agentaddress_address.ipv6  | ansible_facts['default_ipv4']['address'] ansible_facts['default_ipv6']['address'] | Optional: SNMP bind address ('' disables; loopback always added)              |
 | snmp_agentaddress_port.ipv4 snmp_agentaddress_port.ipv6     | 161 / 161                                                               | Optional: SNMP port                                                              |
 | snmp_agentx_enabled               | false                                                                   | Optional: enable AgentX                                                          |
 | snmp_additional_packages          | []                                                                      | Extra packages to install with snmpd                                             |

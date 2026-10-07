@@ -330,7 +330,7 @@
   tags:
     - configuration
   ansible.builtin.template:
-    src: "default/snmpd.{{ ansible_os_family }}.j2"
+    src: "default/snmpd.{{ ansible_facts['os_family'] }}.j2"
     dest: "{{ snmp_daemon_config }}"
     owner: root
     group: root

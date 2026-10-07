@@ -16,7 +16,7 @@
       quotes, '#' or backslashes) before running this role.
   vars:
     snmp_safe_chars: '^[A-Za-z0-9!$%&()*+,\-./:;<=>?@\[\]^_`{|}~]+$'
-  when: ansible_system == "Linux"
+  when: ansible_facts['system'] == "Linux"
   tags:
     - configuration
     - packages
@@ -27,24 +27,24 @@
       - snmp_community is defined
       - snmp_community | length > 0
     fail_msg: Set snmp_community before running this role on Windows.
-  when: ansible_os_family == "Windows"
+  when: ansible_facts['os_family'] == "Windows"
   tags:
     - configuration
     - packages
 
-# NOTE: the "{{ ansible_distribution[:19] }}.yml" entry below truncates
+# NOTE: the "{{ ansible_facts['distribution'][:19] }}.yml" entry below truncates
 # e.g. "Microsoft Windows 10 Pro" / "Microsoft Windows 11 Enterprise" to
 # "Microsoft Windows 1" so Windows client editions match the
 # "Microsoft Windows 1.yml" vars/tasks files. Do not rename those files.
 - name: 'Load OS specific variables and tasks'
   vars:
     snmp_os_files:
-      - "{{ ansible_distribution }}-{{ ansible_distribution_version }}.yml"
-      - "{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
-      - "{{ ansible_distribution }}.yml"
-      - "{{ ansible_distribution[:19] }}.yml"
-      - "{{ ansible_os_family }}.yml"
-      - "{{ ansible_system }}.yml"
+      - "{{ ansible_facts['distribution'] }}-{{ ansible_facts['distribution_version'] }}.yml"
+      - "{{ ansible_facts['distribution'] }}-{{ ansible_facts['distribution_major_version'] }}.yml"
+      - "{{ ansible_facts['distribution'] }}.yml"
+      - "{{ ansible_facts['distribution'][:19] }}.yml"
+      - "{{ ansible_facts['os_family'] }}.yml"
+      - "{{ ansible_facts['system'] }}.yml"
       - "defaults.yml"
   tags:
     - configuration

@@ -15,8 +15,8 @@ snmp_agentaddress_protocol:
   ipv4: udp
   ipv6: udp6
 snmp_agentaddress_address:
-  ipv4: "{{ ansible_default_ipv4.address | default('') }}"
-  ipv6: "{{ ansible_default_ipv6.address | default('') }}"
+  ipv4: "{{ ansible_facts['default_ipv4']['address'] | default('') }}"
+  ipv6: "{{ ansible_facts['default_ipv6']['address'] | default('') }}"
 snmp_agentaddress_port:
   ipv4: 161
   ipv6: 161
