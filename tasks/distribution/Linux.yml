@@ -84,10 +84,8 @@
       ansible.builtin.package:
         name: sudo
     - name: "Linux : Allow snmpd to run proxmox extension as root"
-      ansible.builtin.copy:
-        content: |
-          # {{ ansible_managed }}
-          {{ snmp_daemon_user }} ALL=(root) NOPASSWD: {{ snmp_extension_scripts }}/proxmox
+      ansible.builtin.template:
+        src: sudoers.d/snmpd-proxmox.j2
         dest: /etc/sudoers.d/snmpd-proxmox
         owner: root
         group: root
@@ -357,13 +355,8 @@
         mode: "0755"
 
     - name: "Linux : Install the snmpd unit drop-in"
-      ansible.builtin.copy:
-        content: |
-          # {{ ansible_managed }}
-          [Service]
-          EnvironmentFile=-{{ snmp_daemon_config }}
-          ExecStart=
-          ExecStart=/usr/sbin/snmpd $SNMPDOPTS -f
+      ansible.builtin.template:
+        src: systemd/snmpd.service.d/options.conf.j2
         dest: /etc/systemd/system/snmpd.service.d/options.conf
         owner: root
         group: root

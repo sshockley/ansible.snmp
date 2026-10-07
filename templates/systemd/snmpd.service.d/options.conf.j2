@@ -1,0 +1,5 @@
+# {{ ansible_managed }}
+[Service]
+EnvironmentFile=-{{ snmp_daemon_config }}
+ExecStart=
+ExecStart=/usr/sbin/snmpd $SNMPDOPTS -f
