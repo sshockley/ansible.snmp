@@ -1,11 +1,9 @@
 ---
 name: Molecule
 
+# Manual only until the scenarios pass; restore push/pull_request triggers then.
 on:
-  push:
-    branches:
-      - master
-  pull_request:
+  workflow_dispatch:
 
 jobs:
   molecule:

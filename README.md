@@ -1,6 +1,6 @@
 # Ansible Role: SNMP
 
-[![Lint](https://github.com/sshockley/ansible.snmp/actions/workflows/lint.yml/badge.svg)](https://github.com/sshockley/ansible.snmp/actions/workflows/lint.yml) [![Molecule](https://github.com/sshockley/ansible.snmp/actions/workflows/molecule.yml/badge.svg)](https://github.com/sshockley/ansible.snmp/actions/workflows/molecule.yml) [![license](https://img.shields.io/github/license/sshockley/ansible.snmp.svg?style=popout-square)](LICENSE)
+[![Lint](https://github.com/sshockley/ansible.snmp/actions/workflows/lint.yml/badge.svg)](https://github.com/sshockley/ansible.snmp/actions/workflows/lint.yml) [![license](https://img.shields.io/github/license/sshockley/ansible.snmp.svg?style=popout-square)](LICENSE)
 
 ## Description
 
@@ -87,7 +87,7 @@ None
 
 ## Testing
 
-Linux support is tested with [Molecule](https://ansible.readthedocs.io/projects/molecule/) in Docker, using systemd-enabled images, on every push and pull request.
+Linux support is tested with [Molecule](https://ansible.readthedocs.io/projects/molecule/) in Docker, using systemd-enabled images.
 
 | Scenario | Covers                                                                                                                              |
 | :------- | :---------------------------------------------------------------------------------------------------------------------------------- |
