@@ -15,6 +15,6 @@
 | snmp_agentx_enabled               | false                                                                   | Optional: enable AgentX                                                          |
 | snmp_additional_packages          | []                                                                      | Extra packages to install with snmpd                                             |
 | snmp_extension_scripts            | /usr/local/lib/snmpd                                                    | Directory for extension scripts                                                  |
-| snmp_extension_list               | []                                                                      | Extra extensions: list of `url` (script) and `extend` (snmpd `extend` arguments) |
+| snmp_extension_list               | []                                                                      | Extra extensions: list of `url` (script) and `extend` (snmpd `extend` arguments); scripts dropped from the list are removed |
 | snmp_librenms_repo                | master branch of sshockley/librenms-agent                               | Source for LibreNMS agent scripts                                                |
 | snmp_include_smart                | false                                                                   | Install smartmontools and the smart-v1 extension                                 |

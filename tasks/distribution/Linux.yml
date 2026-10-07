@@ -70,6 +70,45 @@
   loop_control:
     label: "{{ item.url }}"
 
+# The manifest records the scripts installed from snmp_extension_list, so ones
+# dropped from the list can be removed without touching other files.
+- name: "Linux : Remove scripts dropped from snmp_extension_list"
+  become: true
+  tags:
+    - configuration
+  vars:
+    snmp_extension_manifest: "{{ snmp_extension_scripts }}/.snmp_extension_list.json"
+    snmp_extension_names: >-
+      {{ snmp_extension_list | map(attribute='url') | map('urlsplit', 'path') | map('basename') | list }}
+  block:
+    - name: "Linux : Read the snmp_extension_list manifest"
+      ansible.builtin.slurp:
+        src: "{{ snmp_extension_manifest }}"
+      register: snmp_extension_manifest_raw
+      failed_when: false
+
+    - name: "Linux : Remove scripts no longer in snmp_extension_list"
+      ansible.builtin.file:
+        path: "{{ snmp_extension_scripts }}/{{ item }}"
+        state: absent
+      # LibreNMS scripts are installed and removed by the tasks below
+      loop: >-
+        {{ (snmp_extension_manifest_raw.content | default('W10=') | b64decode | from_json)
+           | difference(snmp_extension_names)
+           | difference(snmp_librenms_extensions | map(attribute='url') | map('basename')) }}
+
+    - name: "Linux : Write the snmp_extension_list manifest"
+      ansible.builtin.copy:
+        content: "{{ snmp_extension_names | to_json }}"
+        dest: "{{ snmp_extension_manifest }}"
+        owner: root
+        group: root
+        mode: "0644"
+        seuser: system_u
+        serole: object_r
+        setype: lib_t
+        selevel: s0
+
 - name: "Linux : Proxmox extension prerequisites"
   become: true
   tags:

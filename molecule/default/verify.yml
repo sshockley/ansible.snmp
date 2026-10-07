@@ -166,6 +166,7 @@
             verify_scripts ~ '/proxmox',
             verify_scripts ~ '/smart-v1',
             verify_scripts ~ '/smart-v1.config',
+            verify_scripts ~ '/dropped.sh',
             '/etc/cron.d/99smart-v1',
             '/etc/sudoers.d/snmpd-proxmox']
            + ([] if verify_redhat else [verify_confdir ~ '/snmpd.conf.d/linux_config_files.conf']) }}
@@ -178,6 +179,23 @@
       loop: "{{ verify_absent.results }}"
       loop_control:
         label: "{{ item.item }}"
+
+    - name: Stat a script the role did not install
+      ansible.builtin.stat:
+        path: "{{ verify_scripts }}/local.sh"
+      register: verify_local_script
+
+    - name: Read the snmp_extension_list manifest
+      ansible.builtin.slurp:
+        src: "{{ verify_scripts }}/.snmp_extension_list.json"
+      register: verify_manifest
+
+    - name: Check the manifest is current and other scripts were kept
+      ansible.builtin.assert:
+        that:
+          - verify_local_script.stat.exists
+          - (verify_manifest.content | b64decode | from_json) == ['hello.sh']
+        fail_msg: "Manifest: {{ verify_manifest.content | b64decode }}"
 
     - name: Read the generated cron jobs
       ansible.builtin.slurp:

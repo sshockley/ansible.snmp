@@ -32,6 +32,14 @@
         content: "# stale\n"
       - path: /etc/sudoers.d/snmpd-proxmox
         content: "# stale\n"
+      # A script dropped from snmp_extension_list since the last run
+      - path: /usr/local/lib/snmpd/.snmp_extension_list.json
+        content: '["hello.sh", "dropped.sh"]'
+      - path: /usr/local/lib/snmpd/dropped.sh
+        content: "#!/bin/sh\n"
+      # Not installed by the role, so it must be left alone
+      - path: /usr/local/lib/snmpd/local.sh
+        content: "#!/bin/sh\n"
   tasks:
     - name: Update apt cache
       when: ansible_facts['os_family'] == 'Debian'
