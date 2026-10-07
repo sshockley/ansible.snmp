@@ -109,7 +109,7 @@
             verify_snmpd_cmdline: >-
               {{ (verify_snmpd_cmdline_raw.content | b64decode).split('\x00') | join(' ') }}
             # From vars/Debian.yml and vars/Ubuntu.yml
-            verify_logging_options: "{{ '-Lsd' if ansible_facts['distribution'] == 'Ubuntu' else '-Lsed' }}"
+            verify_logging_options: "{{ '-LSed' if ansible_facts['distribution'] == 'Ubuntu' else '-LSed' }}"
           ansible.builtin.assert:
             that:
               - "(verify_logging_options ~ ' -Lf /dev/null') in verify_snmpd_cmdline"
