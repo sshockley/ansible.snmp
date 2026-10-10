@@ -3,4 +3,4 @@
 SHELL=/bin/bash
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 MAILTO=root
-{{ snmp_cron_osupdates }} root {{ snmp_extension_scripts }}/osupdates-unpriv-generate.sh > {{ snmp_persistent_directory }}/osupdates.txt.tmp && mv {{ snmp_persistent_directory }}/osupdates.txt.tmp {{ snmp_persistent_directory }}/osupdates.txt
+{{ snmp_cron_osupdates }} root {{ snmp_extension_scripts }}/osupdates-unpriv-generate.sh
